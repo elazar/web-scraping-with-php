@@ -1,0 +1,306 @@
+=t=Retrieval=t=
+
+The first task that a web scraping application must be capable of performing is the retrieval of documents containing the information to be extracted. If you have used a web browser without becoming aware of all that it does "under the hood" to render a page for your viewing pleasure, this may sound trivial to you. However, the complexity of a web scraping application is generally proportional to the complexity of the application it targets for retrieving and extracting data.
+
+For targets consisting of multiple pages or requiring retention of session or authentication information, some level of reverse-engineering is often required to develop a corresponding web scraping application. Like a complex mathematics problem with a very simple answer, the development of web scraping applications can sometimes involve more analysis of the target than work to implement a script capable of retrieving and extracting data from it.
+
+This sort of reconnaisance requires a decent working knowledge of the **HyperText Transfer Protocol** or **HTTP**, the protocol that powers the internet. The majority of this chapter will focus on familiarization with that protocol. The end goal is that you become capable of performing the necessary research to learn how a target application works such that you are capable of writing an application to extract the data you want.
+
+=1=Requests=1=
+
+The HTTP protocol is intended to give two parties a common method of communication: **web clients** and **web servers**. Clients are programs or scripts that send requests to servers. Examples of clients include web browsers, such as Internet Explorer and Mozilla Firefox, and crawlers, like those used by Yahoo! and Google to expand their search engine offerings. Servers are programs that run indefinitely and do nothing but receive and send responses to client requests. Popular examples include Microsoft IIS and the Apache HTTP Server.
+
+You must be familiar enough with the anatomy and nuances of HTTP requests and responses to do two things. First, you must be able to configure and use your preferred client to view requests and responses that pass between it and the server hosting the target application as you access it. This is essential to developing your web scraping application without expending an excessive amount of time and energy on your part.
+
+Second, you must be able to use most of the features offered by a PHP HTTP client library. Ideally, you would know HTTP and PHP well enough to build your own client library or fix issues with an existing one if necessary. In principle, however, you should resort to finding and using an adequate existing library first and constructing one that is reusable as a last resort. We will examine some of these libraries in the next chapter.
+
+{{Supplemental References
+
+This book will cover HTTP in sufficient depth as it relates to web scraping, but should not in any respect be considered a comprehensive guide on the subject. Here are a few recommended references to supplement the material covered in this book.
+
+- RFC 2616 HyperText Transfer Protocol -- HTTP/1.1 (http://www.ietf.org/rfc/rfc2616.txt)
+- RFC 3986 Uniform Resource Identifiers (URI): Generic Syntax (http://www.ietf.org/rfc/rfc3986.txt)
+- "HTTP: The Definitive Guide" (ISBN 1565925092)
+- "HTTP Pocket Reference: HyperText Transfer Protocol" (ISBN 1565928628)
+- "HTTP Developer's Handbook" (ISBN 0672324547)
+- Ben Ramsey's blog series on HTTP (http://benramsey.com/http-status-codes)}}
+
+=2=GET Requests=2=
+
+Let's start with a very simple HTTP request, one to retrieve the main landing page of the Wikipedia web site in English.
+
+<code>
+GET /wiki/Main_Page HTTP/1.1
+Host: en.wikipedia.org
+</code>
+
+The individual components of this request are as follows:
+- ''GET'' is the **method** or **operation**. Think of it as a verb in a sentence, an action that you want to perform on something. Other examples of methods include POST and HEAD. These will be covered in more detail later in the chapter. 
+- ''/wiki/Main_Page'' is the **Uniform Resource Identifier** or **URI**. It provides a unique point of reference for the **resource**, the object or target of the operation.
+- ''HTTP/1.1'' specifies the HTTP **protocol version** in use by the client, which will be detailed further a little later in this chapter.
+- The method, URL, and HTTP version collectively make up the **request line**, which ends with a <CR><LF> (carriage return-line feed) sequence, which corresponds to ASCII characters 13 and 10 or Unicode characters U+000D and U+000A respectively. (See RFC 2616 Section 2.2 for more information.)
+- A single **header** ''Host'' and its associated value ''en.wikipedia.org'' follow the request line.
+- Based on the resource, the value of the Host header, and the protocol in use (HTTP, as opposed to HTTPS), ''http://en.wikipedia.org/wiki/Main_Page'' is the resulting full URL of the requested resource.
+
+{{URI vs URL
+
+URI is sometimes used interchangeably with URL, which frequently leads to confusion about the exact nature of either. A URI is used to uniquely identify a resource, indicate how to locate a resource, or both. URL is the subset of URI that does both (as opposed to either) and thus is what makes them usable by humans. After all, what's the use of being able to identify a resource if you can't access it! See sections 1.1.3 and 1.2.2 of RFC 3986 for more information. }}
+
+GET is by far the most commonly used operation in the HTTP protocol. According to the HTTP specification, the intent of GET is to request a representation of a resource, essentially to "read" it as you would a file on a file system. Common examples of formats for such representations include HTML and XML-based formats such as XHTML, RSS, and Atom.
+
+In principle, GET should not modify any existing data exposed by the application. For this reason, it is considered to be what is called a **safe operation**. It is worth noting that as you examine your target applications, you may encounter situations where GET operations are used incorrectly to modify data rather than simply returning it. This indicates poor application design and should be avoided when developing your own applications.
+
+=2=Query Strings=2=
+
+Another provision of URLs is a mechanism called the **query string** that is used to pass **request parameters** to web applications. Below is a GET request that includes a query string and is used to request a form to edit a page on Wikipedia.
+
+<code>
+GET /w/index.php?title=Query_string&action=edit
+Host: en.wikipedia.org
+</code>
+
+A few notable traits of this URL:
+- A question mark denotes the end of the resource address and the beginning of the query string.
+- The query string is composed of key-value pairs where each pair is separated by an ampersand.
+- Keys and values are separated by an equal sign.
+
+Query strings are not specific to GET operations and can be used in other operations as well. Speaking of which, let's move on.
+
+=2=POST Requests=2=
+
+The next most common HTTP operation after GET is POST, which is used to submit data to a specified resource. When using a web browser as a client, this is most often done via an HTML form. POST is intended to add to or alter data exposed by the application, a potential result of which is that a new resource is created or an existing resource is changed. One major difference between a GET request and a POST request is that the latter includes a **body** following the request headers to contain the data to be submitted.
+
+<code>
+POST /w/index.php?title=Wikipedia:Sandbox&action=submit HTTP/1.1
+Host: en.wikipedia.org
+
+wpAntispam=&wpSection=&wpStarttime=20080719022313&wpEdittime=200807190
+22100&&wpScrolltop=&wpTextbox1=%7B%7BPlease+leave+this+line+alone+%28s
+andbox+heading%29%7D%7D+%3C%21--+Hello%21+Feel+free+to+try+your+format
+ting+and+editing+skills+below+this+line.+As+this+page+is+for+editing+e
+xperiments%2C+this+page+will+automatically+be+cleaned+every+12+hours.+
+--%3E+&wpSummary=&wpAutoSummary=d41d8cd98f00b204e9800998ecf8427e&wpSav
+e=Save+page&wpPreview=Show+preview&wpDiff=Show+changes&wpEditToken=%5C
+%2B
+</code>
+
+A single blank line separates the headers from the body. The body should look familiar, as it is formatted identically to the query string with the exception that it is not prefixed with a question mark. Aside from the obvious difference that the query string is included in the URL while the request body exists separately from it, there is one other notable dissimilarity between the two: most mainstream browsers impose a limit on the maximum character length of a query string. There is no standardized value for this, but Internet Explorer 7 appears to hold the current least common denominator of 2,047 bytes at the time of this writing. Querying a search engine should turn up your preferred browser's limit. It's rare for this to become an issue during development, but it is a circumstance worth knowing. By contrast, this limitation does not apply to the request body.
+
+{{URL Encoding
+
+One trait of query strings is that parameter values are encoded using percent-encoding or, as it's more commonly known, **URL encoding**. The PHP function ''urlencode'' is a convenient way to apply this to string values. Most HTTP client libraries handle encoding request parameters for you. Though it's called URL encoding, the technical details for it are actually more closely associated with the URI as shown in section 2.1 of RFC 3986.}}
+
+=2=HEAD Requests=2=
+
+Though not common when accessing target web applications, HEAD requests are useful in web scraping applications in several ways. They function in the same way as a GET request with one exception: when the server delivers its response, it will not deliver the resource representation that normally comprises the response body. The reason this is useful is that it allows a client to get at the data present in the response headers without having the download the entire response, which is liable to be significantly larger. Such data can include whether or not the resource is still available for access and, if it is, when it was last modified.
+
+<code>
+HEAD /wiki/Main_Page HTTP/1.1
+Host: en.wikipedia.org
+</code>
+
+Speaking of responses, now would be a good time to investigate those in more detail.
+
+=1=Responses=1=
+
+Aside from the first response line, called the **status line**, responses are formatted very similarly to requests. While different headers are used in requests and responses, they are formatted the same way. A blank line separates the headers and the body in both requests and responses. The body may be absent in either depending on what the request operation is. Below is an example response.
+
+<code>
+HTTP/1.0 200 OK
+Date: Mon, 21 Jul 2008 02:32:52 GMT
+Server: Apache
+X-Powered-By: PHP/5.2.5
+Cache-Control: private, s-maxage=0, max-age=0, must-revalidate
+Content-Language: en
+Last-Modified: Mon, 21 Jul 2008 02:06:27 GMT
+Content-Length: 53631
+Content-Type: text/html; charset=utf-8
+Connection: close
+
+[body...]
+</code>
+
+Aside from headers, the main difference in content between requests and responses is in the contents of the request line versus the status line. In the response example above:
+- ''1.0'' is the minimum HTTP protocol version under which the response can be correctly interpreted by the client.
+- ''200'' is a response **status code** and ''OK'' is its corresponding human-readable description. It indicates the result of the server attempting to process the request, in this case that the request was successful.
+
+{{HTTP Status Codes
+
+Status codes are divided into five classes distinguished by the first digit of the code. Below is a brief summary of each class. See section 10 of RFC 2616 for further descriptions of circumstances under which specific status codes may be received.
+
+- 1xx Informational: Request received, continuing process.
+- 2xx Success: Request received, understood, and accepted.
+- 3xx Redirection: Client must take additional action to complete the request.
+- 4xx Client Error: Request could not be fulfilled because of a client issue.
+- 5xx Server Error: Request was valid but the server failed to process it.}}
+
+Moving right along, let us examine headers in more depth.
+
+=1=Headers=1=
+
+An all-purpose method of communicating a variety of information related to requests and responses, headers are used by the client and server to accomplish a number of things including retention of state using cookies and identity verification using HTTP authentication. This section will deal with those that are particularly applicable to web scraping applications. For more information, see section 14 of RFC 2616.
+
+=2=Cookies=2=
+
+HTTP is designed to be a stateless protocol. That is, once a server returns the response for a request, it effectively "forgets" about the request. It may log information about the request and the response it delivered, but it does not retain any sense of state for the same client between requests. Cookies are a method of circumventing this using headers. Here's how it works:
+
+- The client issues a request.
+- The server, in its response, includes a Set-Cookie header whose value is comprised of name-value pairs each with optional associated attribute-value pairs.
+- In subsequent requests, the client will include a Cookie header that contains the data it received in the Set-Cookie response header.
+
+Cookies are frequently used to restrict access to certain content, most often by requiring some form of identity authentication before the target application will indicate that a cookie should be set. Most client libraries have the capability to handle parsing and resending cookie data as appropriate, though some require explicit instruction before they will do so. For more information on cookies, see RFC 2109 or its later (though less widely adopted) rendition RFC 2965.
+
+One of the aforementioned attributes, "expires," is used to indicate when the client should dispose of the cookie and not persist its data in subsequent requests. This attribute is optional and its presence or lack thereof is the defining factor in whether or not the cookie is what's called a **session cookie**. If a cookie has no expiration value set, it will persist for the duration of the client session. For normal web browsers, this is generally when all instances of the browser application have been closed.
+
+=2=Redirection=2=
+
+The Location header is used by the server to redirect the client to a URI. In this scenario, the response will most likely include a 3xx class status code (such as 302 Found), but may also include a 201 code to indicate the creation of a new resource. See subsection 14.30 of RFC 2616 for more information.
+
+It is hypothetically possible for a malfunctioning application to cause the server to initiate an infinite series of redirections between itself and the client. For this reason, client libraries often implement a limit on the number of consecutive redirections it will process before assuming that the application being accessed is behaving inappropriately and terminating. Libraries often implement a default limit, but allow you to override it with your own.
+
+=2=Referring URLs=2=
+
+It is possible for a requested resource to refer to other resources in some way. When this happens, clients traditionally include the URL of the referring resource in the ''Referer'' header. Yes, the header name is misspelled there. The commonality of that particular misspelling is part of the reason that it actually made it into the official HTTP specification, thereby becoming the standard industry spelling used when referring to that particular header.
+
+There are multiple situations in which the specification of a referrer can occur. A user may click on a hyperlink in a browser, in which case the full URL of the resource containing the hyperlink would be the referrer. When a resource containing markup with embedded images is requested, subsequent requests for those images will contain the full URL of the page containing the images as the referrer. A referrer is also specified when redirection occurs, as described in the previous section.
+
+The reason this is relevant is because some applications depend on the value of the Referer header by design, which is less than ideal for the simple fact that the header value can be spoofed. In any case, it is important to be aware that some applications may not function as expected if the provided header value is not consistent with what is sent when the application is used in a browser. See subsection 14.36 of RFC 2616 for more information.
+
+=2=Persistent Connections=2=
+
+The standard operating procedure for an HTTP request is as follows:
+
+- A client connects to a server.
+- The client sends a request over the established connection.
+- The server returns a response.
+- The connection is terminated.
+
+When sending multiple consecutive requests to the same server, however, the first and fourth steps in that process can cause a significant amount of overhead. HTTP 1.0 established no solution for this; one connection per request was normal behavior. Between the releases of the HTTP 1.0 and 1.1 standards, a convention was informally established that involved the client including a ''Connection'' header with a value of ''Keep-Alive'' in the request to indicate to the server that a persistent connection was desired.
+
+Later, 1.1 was released and changed the default behavior from one connection per request to persist connections. For a non-persistent connection, the client could include a ''Connection'' header with a value of ''close'' to indicate that the server should terminate the connection after it sent the response. The difference between 1.0 and 1.1 is an important distinction and should be a point of examination when evaluating both client libraries and servers hosting target applications so that you are aware of how they will behave with respect to persistent connections. See subsection 8.1 of RFC 2616 for more information.
+
+There is an alternative implementation that gained significantly less support in clients and servers involving the use of a ''Keep-Alive'' header. Technical issues with this are discussed in subsection 19.7.1 of RFC 2068, but explicit use of this header should be avoided. It is mentioned here simply to make you aware that it exists and is related to the matter of persistent connections.
+
+=2=Content Caching=2=
+
+Two methods exist to allow clients to query servers in order to determine if resources have been updated since the client last accessed them. Subsections of RFC 2616 section 14 detail related headers.
+
+The first method is time-based where the server returns a Last-Modified header (subsection 29) in its response and the client can send that value in a If-Modified-Since header (subsection 25) in a subsequent request for the same resource.
+
+The other method is hash-based where the server sends a hash value in its response via the ETag header (subsection 19) and the client may send that value in a If-None-Match header (subsection 26) in a subsequent request for the same resource.
+
+If the resource has not changed in either instance, the server simply returns a 304 Not Modified response. Aside from checking to ensure that a resource is still available (which will result in a 404 response if it is not), this is an appropriate situation in which to use a HEAD request.
+
+Alternatively, the logic of the first method can be inverted by using If-Unmodified-Since (subsection 28), in which case the server will return a 412 Precondition Failed response if the resource has in fact been modified since the provided access time.
+
+=2=User Agents=2=
+
+Clients are sometimes referred to as user agents. This refers to the fact that web browsers are agents that act on behalf of users in order to require minimal intervention on the user's part. The User-Agent header enables the client to provide information about itself, such as its name and version number. Crawlers often use it to provide a URL for obtaining more information about the crawler or the e-mail address of the crawler's operator. A simple search engine query should reveal a list of user agent strings for mainstream browsers. See subsection 14.43 of RFC 2616 for more information.
+
+Unfortunately, some applications will engage in a practice known as **user agent sniffing** or **browser sniffing** in which they vary the responses they deliver displayed based on the user agent string provided by the client. This can include completely disabling a primary site feature, such as an e-commerce checkout page that uses ActiveX (a technology specific to Windows and Internet Explorer).
+
+One well-known application of this technique is the robots exclusion standard, which is used to explicitly instruct crawlers to avoid accessing individual resources or the entire web site. More information about this is available at http://www.robotstxt.org. The guidelines detailed there should definitely be accounted for when developing a web scraping application so as to prevent it from exhibiting behavior inconsistent with that of a normal user.
+
+In some cases, a client practice called **user agent spoofing** involving the specification of a false user agent string is enough to circumvent user agent sniffing, but not always. An application may have platform-specific requirements that legitimately warrant it denying access to certain user agents. In any case, spoofing the user agent is a practice that should be avoided to the fullest extent possible.
+
+=2=Ranges=2=
+
+The Range request header allows the client to specify that the body of the server's response should be limited to one or more specific byte ranges of what it would normally be. Originally intended to allow failed retrieval attempts to resume from their stopping points, this feature can allow you to minimize data transfer between your application and the server to reduce bandwidth consumption and runtime of your web scraping application.
+
+This is applicable in cases where you have a good rough idea of where your target data is located within the document, especially if the document is fairly large and you only need a small subset of the data it contains. However, using it does add one more variable to the possibility of your application breaking if the target site changes and you should bear that in mind when electing to do so.
+
+While the format of the header value is being left open to allow for other range units, the only unit supported by HTTP/1.1 is bytes. The client and server may both use the Accept-Ranges header to indicate what units they support. The server will include the range (in a slightly different format) of the full response body in which the partial response body is located using the Content-Range header. 
+
+In the case of bytes, the beginning of the document is represented by 0. Ranges use inclusive bounds. For example, the first 500 bytes of a document would be specified as 0-499. To specify from a point to the end of the document, simply exclude the later bound. The portion of a document beginning from the byte 500 going to its end is represented as 500-. 
+
+If a range is specified that is valid with respect to the resource being requested, the server should return a 206 Partial Content response. Otherwise, it should return a 416 Requested Range Not Satisfiable response. See sections 14.35 and 14.16 of RFC 2616 for more information on the Range and Content-Range headers respectively.
+
+=2=Basic HTTP Authentication=2=
+
+Another less frequently used method of persisting identity between requests is HTTP authentication. Most third-party clients offer some form of native support for it. It's not commonly used these days, but it's good to be aware of how to derive the appropriate header values in cases where you must implement it yourself. For more information on HTTP authentication, see RFC 2617.
+
+HTTP authentication comes in several "flavors," the more popular two being Basic (unencrypted) and Digest (encrypted). Basic is the more common of the two, but the process for both goes like this:
+
+- A client sends a request without any authentication information.
+- The server sends a response with a 401 status code and a WWW-Authenticate header.
+- The client resends the original request, but this time includes an Authorization header including the authentication credentials.
+- The server either sends a response indicating success or one with a 403 status code indicating that authentication failed.
+
+In the case of Basic authentication, the value of the Authorization header will be the word "Basic" followed by a single space and then by a Base64-encoded sequence derived from the username-password pair separated by a colon. If, for example, the username is "bigbadwolf" and the password is "letmein" then the value of the header would be "Basic YmlnYmFkd29sZjpsZXRtZWlu" where the Base64-encoded version of the string "bigbadwolf:letmein" is what follows "Basic."
+
+=2=Digest HTTP Authentication=2=
+
+Digest authentication is a bit more involved. The WWW-Authenticate header returned by the server will contain the word "Digest" followed by a single space and then by a number of key-value pairs in the format ''key="value"'' separated by commas. Below is an example of this header.
+
+<code>
+WWW-Authenticate: Digest realm="testrealm@host.com",
+                         qop="auth,auth-int",
+                         nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",
+                         opaque="5ccc069c403ebaf9f0171e9517f40e41"
+</code>
+
+The client must respond with a specific response value that the server will verify before it allows the client to proceed. To derive that value requires use of the MD5 hash algorithm, which in PHP can be accessed using the ''md5'' or ''hash'' functions. Here's the process:
+
+- Concatenate the appropriate username, the value of the realm key provided by the server, and the appropriate password together separated by colons and take the MD5 hash of that string. We'll call this HA1. It shouldn't change for the rest of the session.
+
+<code php>
+<?php
+$ha1 = md5($username . ':testrealm@host.com:' . $password);
+</code>
+
+- Concatenate the method and URI of the original request separated by a colon and take the MD5 hash of that string. We'll call this HA2. This will obviously vary with your method or URI.
+
+<code php>
+<?php
+$ha2 = md5('GET:/wiki/Main_Page');
+</code>
+
+- Initialize a request counter that we'll call nc to 1. The value of this counter will need to be incremented and retransmitted with each subsequent request to uniquely identify it. Retransmitting a request counter value used in a previous request will result in the server rejecting it. Note that the value of this counter will need to be expressed to the server as a hexadecimal number. The ''dechex'' PHP function is useful for this.
+
+<code php>
+<?php
+$nc = 1;
+</code>
+
+- Generate a random hash using the aforementioned hashing functions that we'll call the client nonce or cnonce. The ''time'' and ''rand'' functions may be useful here. This can (and probably should) be regenerated and resent with each request.
+
+<code php>
+<?php
+$cnonce = md5($_SERVER['REMOTE_ADDR'] . time());
+</code>
+
+- Take note of the value of the nonce key provided by the server, also known as the server nonce. We'll refer to this as simply the nonce. This is randomly generated by the server and will expire after a certain period of time, at which point the server will respond with a 401 status code. It will modify the Authorization header in returns in two noteworthy ways: 1) the key-value pair stale=TRUE will be added; 2) the nonce value will be changed. When this happens, simply rederive the response code with the new nonce value and resubmit the original request (not forgetting to increment the request counter).
+
+- Concatenate HA1, the server nonce (nonce), the current request counter (nc) value, the client nonce you generated (cnonce), an appropriate value (most likely "auth") from the comma-separated list contained in the qop (quality of protection) key provided by the server, and HA2 together separated by colons and take the MD5 hash of that string. This is the finally response code.
+
+<code php>
+<?php
+$response = implode(':', array(
+    $ha1,
+    $nonce,
+    dechex($nc),
+    $cnonce,
+    'auth',
+    $ha2
+));
+</code>
+
+- Lastly, send everything the server originally sent in the WWW-Authenticate header, plus the response value and its constituents (except the password obviously), back to the server in the usual Authorization header.
+
+<code>
+Authorization: Digest username="USERNAME",
+                      realm="testrealm@host.com",
+                      nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",
+                      uri="/wiki/Main_Page",
+                      qop="auth",
+                      nc=00000001,
+                      cnonce="0a4f113b",
+                      response="6629fae49393a05397450978507c4ef1",
+                      opaque="5ccc069c403ebaf9f0171e9517f40e41"
+</code>
+
+Some third-party clients implement this, some don't. Again, it's not commonly used, but it's good to be aware of how to derive the appropriate header value in cases where you must implement it yourself. For more information on HTTP authentication, see RFC 2617.
+
+=1=Wrap-Up=1=
+
+At this point, you should feel comfortable looking at HTTP requests and responses and be capable deducing information about them by analyzing their individual components. The next chapter will expound upon this information by reviewing several commonly used PHP HTTP client implementations.

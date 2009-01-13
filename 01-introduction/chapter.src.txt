@@ -1,0 +1,49 @@
+=t=Introduction=t=
+
+If you are looking to get an idea of what this book is about or whether you are a member of its intended audience, this chapter is for you. It will provide some background on the material to be covered in the pages to follow and address some common related concerns that may be pertinent. If you have a good high-level idea of what web scraping is and would like to jump straight into the more technical content in this book, you can safely skip on ahead to the next chapter.
+
+=1=Who should read this book?=1=
+
+This book is targeted at developers of an intermediate or advanced level who already have a fair amount of comfort programming with PHP 5. You should be aware of object-oriented programming principles such as inheritance, abstraction, and encapsulation as well as how these principles relate to the PHP 5 object model. The book will detail general concepts and use PHP as a (very qualified) means to the end of illustrating these concepts with practical examples. Knowledge of the HTTP protocol, XML concepts and related PHP extensions, or JavaScript will also prove particularly helpful.
+
+=1=What exactly is web scraping?=1=
+
+Web scraping is a process involving the retrieval a semi-structured document from the internet, generally a web page in a markup language such as HTML or XHTML, and analysis of that document in order to extract specific data from it for use in another context. It is commonly (though not entirely accurately) also known as screen scraping. Web scraping does not technically fall within the field of data mining because the latter implies an attempt to discern semantic patterns or trends in large data sets that have already been obtained. Web scraping applications (also called intelligent, automated, or autonomous agents) are concerned only with obtaining the data itself through retrieval and extraction and can involve data sets of significantly varied sizes.
+
+You might be saying to yourself that web scraping sounds a lot like acting as a client for a web service. The difference is in the intended audience of the document and, by proxy, the document's format and structure. Web services, because of their intended purpose, are inherently bound by the requirement to generate valid markup in order to remain useful. They must maintain consistent standard formatting in order for machines to be capable of parsing their output.
+
+Web browsers, on the other hand, are generally a lot more forgiving about handling visual rendering of a document when its markup is not valid. As well, web browsers are intended for human use and the methods in which they consume information do not always fall parallel to the way machines would consume it when using an equivalent web service. This can make development of web scraping applications difficult in some instances. Like the obligation of a web service to generate valid markup, a web browser has certain responsibilities. These include respecting server requests to not index certain pages and keeping the number of requests sent to servers within a reasonable amount.
+
+In short, web scraping is the subset of a web browser's functionality necessary to obtain and render data in a manner conducive to how that data will be used.
+
+=1=How is web scraping useful?=1=
+
+Though it's becoming more common for web sites to expose their data using web services, the absence of a data source that is tailored to machines and offers all the data of a corresponding web site is still a common situation. In these instances, the web site itself must effectively become your data source, and web scraping can be employed to automate the consumption of the data it makes available. Additionally, web services are also used to transfer information into external data systems. In their absence, web scraping can also be used to integrate with such systems that don't offer web services, but do offer a web-based interface for their users.
+
+Another application of web scraping that is likely more well-known is the development of automated agents known as crawlers, which seek out resources for storage and analysis that will eventually comprise the search results they deliver to you. In the earliest days of the internet, this type of data was sought out manually by human beings, a slow and tedious process which limited how quickly a search engine could expand its offerings. Web scraping provided an alternative to allow computers to do the grunt work of finding new pages and extracting their content.
+
+Lastly, web scraping is one way -- not the only way or necessarily the recommended way, but certainly a way -- to implement integration testing for web applications. Using its abilities to act as a client in extracting and transmitting data, a web scraping application can simulate the browser activity of a normal user. This can help to ensure that web application output complies with its expected response with respect to the application's requirements.
+
+=1=When should web scraping be used?=1=
+
+Some data providers may only offer a web site while others may offer APIs that do not offer equivalent data in a conducive format or at all. Some web services may involve an extensive authentication process or be unavailable for public consumption. Unreliability of web service endpoints compared to web sites may also make them unfeasible to use. It is in situations like these that web scraping becomes a desirable alternative.
+
+It is common practice to avoid making changes that break backward-compatibility with existing applications that use web service APIs, or to version them to allow application vendors time to transition to new revisions. As such, web services are significantly less prone to be altered than the markup structure of pages on a web site, especially without advance warning. This is especially true of sites that change frequently, which can drastically affect the stability of applications that employ web scraping.
+
+In short, web scraping should be used as a last resort when no other feasible options for acquiring the needed data are available.
+
+=1=Under what conditions is web scraping acceptable?=1=
+
+The answer to this question is a bit extensive and veers off into "legal land." As such, it is included in Appendix A to avoid detracting from the primary purpose of the book.
+
+=1=What does this book cover?=1=
+
+You're obviously reading chapter 1 now, which provides a brief introduction to web scraping, answers common questions, and leads into the meat of the book.
+
+Chapter 2 deals with relevant details of the HTTP protocol, as HTTP clients are used in the process of document retrieval. This includes how requests and responses are structured and various headers that are used in each to implement features such as cookies, HTTP authentication, redirection, and more.
+
+Chapter 3 covers specific PHP HTTP client libraries and their features, usage, and advantages and disadvantages of each. It also goes into developing a custom client library and common concerns when using any library including prevention of throttling, access randomization, agent scheduling, and side effects of client-side scripts. 
+
+=1=OK, I've done my homework. How do I get started with web scraping?=1=
+
+Glad you asked. To answer that question, let's move on to the next chapter.
