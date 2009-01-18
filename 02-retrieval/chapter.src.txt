@@ -34,7 +34,8 @@ GET /wiki/Main_Page HTTP/1.1
 Host: en.wikipedia.org
 </code>
 
-The individual components of this request are as follows:
+The individual components of this request are as follows.
+
 - ''GET'' is the **method** or **operation**. Think of it as a verb in a sentence, an action that you want to perform on something. Other examples of methods include POST and HEAD. These will be covered in more detail later in the chapter. 
 - ''/wiki/Main_Page'' is the **Uniform Resource Identifier** or **URI**. It provides a unique point of reference for the **resource**, the object or target of the operation.
 - ''HTTP/1.1'' specifies the HTTP **protocol version** in use by the client, which will be detailed further a little later in this chapter.
@@ -59,7 +60,8 @@ GET /w/index.php?title=Query_string&action=edit
 Host: en.wikipedia.org
 </code>
 
-A few notable traits of this URL:
+There are a few notable traits of this URL.
+
 - A question mark denotes the end of the resource address and the beginning of the query string.
 - The query string is composed of key-value pairs where each pair is separated by an ampersand.
 - Keys and values are separated by an equal sign.
@@ -120,7 +122,8 @@ Connection: close
 [body...]
 </code>
 
-Aside from headers, the main difference in content between requests and responses is in the contents of the request line versus the status line. In the response example above:
+Aside from headers, the main difference in content between requests and responses is in the contents of the request line versus the status line.
+
 - ''1.0'' is the minimum HTTP protocol version under which the response can be correctly interpreted by the client.
 - ''200'' is a response **status code** and ''OK'' is its corresponding human-readable description. It indicates the result of the server attempting to process the request, in this case that the request was successful.
 
@@ -142,7 +145,7 @@ An all-purpose method of communicating a variety of information related to reque
 
 =2=Cookies=2=
 
-HTTP is designed to be a stateless protocol. That is, once a server returns the response for a request, it effectively "forgets" about the request. It may log information about the request and the response it delivered, but it does not retain any sense of state for the same client between requests. Cookies are a method of circumventing this using headers. Here's how it works:
+HTTP is designed to be a stateless protocol. That is, once a server returns the response for a request, it effectively "forgets" about the request. It may log information about the request and the response it delivered, but it does not retain any sense of state for the same client between requests. Cookies are a method of circumventing this using headers. Here is how they work.
 
 - The client issues a request.
 - The server, in its response, includes a Set-Cookie header whose value is comprised of name-value pairs each with optional associated attribute-value pairs.
@@ -168,7 +171,7 @@ The reason this is relevant is because some applications depend on the value of 
 
 =2=Persistent Connections=2=
 
-The standard operating procedure for an HTTP request is as follows:
+The standard operating procedure for an HTTP request is as follows.
 
 - A client connects to a server.
 - The client sends a request over the established connection.
@@ -219,7 +222,7 @@ If a range is specified that is valid with respect to the resource being request
 
 Another less frequently used method of persisting identity between requests is HTTP authentication. Most third-party clients offer some form of native support for it. It's not commonly used these days, but it's good to be aware of how to derive the appropriate header values in cases where you must implement it yourself. For more information on HTTP authentication, see RFC 2617.
 
-HTTP authentication comes in several "flavors," the more popular two being Basic (unencrypted) and Digest (encrypted). Basic is the more common of the two, but the process for both goes like this:
+HTTP authentication comes in several "flavors," the more popular two being Basic (unencrypted) and Digest (encrypted). Basic is the more common of the two, but the process for both goes like this.
 
 - A client sends a request without any authentication information.
 - The server sends a response with a 401 status code and a WWW-Authenticate header.
@@ -239,40 +242,29 @@ WWW-Authenticate: Digest realm="testrealm@host.com",
                          opaque="5ccc069c403ebaf9f0171e9517f40e41"
 </code>
 
-The client must respond with a specific response value that the server will verify before it allows the client to proceed. To derive that value requires use of the MD5 hash algorithm, which in PHP can be accessed using the ''md5'' or ''hash'' functions. Here's the process:
+The client must respond with a specific response value that the server will verify before it allows the client to proceed. To derive that value requires use of the MD5 hash algorithm, which in PHP can be accessed using the ''md5'' or ''hash'' functions. Here is the process.
 
 - Concatenate the appropriate username, the value of the realm key provided by the server, and the appropriate password together separated by colons and take the MD5 hash of that string. We'll call this HA1. It shouldn't change for the rest of the session.
-
 <code php>
 <?php
 $ha1 = md5($username . ':testrealm@host.com:' . $password);
 </code>
-
 - Concatenate the method and URI of the original request separated by a colon and take the MD5 hash of that string. We'll call this HA2. This will obviously vary with your method or URI.
-
-<code php>
 <?php
 $ha2 = md5('GET:/wiki/Main_Page');
 </code>
-
 - Initialize a request counter that we'll call nc to 1. The value of this counter will need to be incremented and retransmitted with each subsequent request to uniquely identify it. Retransmitting a request counter value used in a previous request will result in the server rejecting it. Note that the value of this counter will need to be expressed to the server as a hexadecimal number. The ''dechex'' PHP function is useful for this.
-
 <code php>
 <?php
 $nc = 1;
 </code>
-
 - Generate a random hash using the aforementioned hashing functions that we'll call the client nonce or cnonce. The ''time'' and ''rand'' functions may be useful here. This can (and probably should) be regenerated and resent with each request.
-
 <code php>
 <?php
-$cnonce = md5($_SERVER['REMOTE_ADDR'] . time());
+$cnonce = md5($_SERVER['REMOTE_ADDR'] . microtime(true));
 </code>
-
 - Take note of the value of the nonce key provided by the server, also known as the server nonce. We'll refer to this as simply the nonce. This is randomly generated by the server and will expire after a certain period of time, at which point the server will respond with a 401 status code. It will modify the Authorization header in returns in two noteworthy ways: 1) the key-value pair stale=TRUE will be added; 2) the nonce value will be changed. When this happens, simply rederive the response code with the new nonce value and resubmit the original request (not forgetting to increment the request counter).
-
 - Concatenate HA1, the server nonce (nonce), the current request counter (nc) value, the client nonce you generated (cnonce), an appropriate value (most likely "auth") from the comma-separated list contained in the qop (quality of protection) key provided by the server, and HA2 together separated by colons and take the MD5 hash of that string. This is the finally response code.
-
 <code php>
 <?php
 $response = implode(':', array(
@@ -284,9 +276,7 @@ $response = implode(':', array(
     $ha2
 ));
 </code>
-
 - Lastly, send everything the server originally sent in the WWW-Authenticate header, plus the response value and its constituents (except the password obviously), back to the server in the usual Authorization header.
-
 <code>
 Authorization: Digest username="USERNAME",
                       realm="testrealm@host.com",

@@ -22,7 +22,8 @@ $response = file_get_contents('http://localhost.example');
 print_r($http_response_header);
 </code>
 
-A few things to note:
+There are a few things to note.
+
 - The ''allow_url_fopen'' PHP configuration setting must be enabled for this to work, which it is in most environments.
 - In this example, the ''file_get_contents'' function call is equivalent to making a GET request for the specified URL '''http://localhost.example'''.
 - ''$response'' will contain the response body after the call to the ''file_get_contents'' function completes.
@@ -38,7 +39,8 @@ $meta = stream_get_meta_data($handle);
 print_r($meta['wrapper_data']);
 </code>
 
-Stepping through this:
+Let's stepping through this.
+
 - The resource ''$handle'' is created to read from the URL '''http://localhost.example'''.
 - The ''stream_get_contents'' function is called to read the remaining data on the stream pointed to by the ''$handle'' resource into ''$response''.
 - The ''stream_get_meta_data'' function is called to read metadata for the stream pointed to by the ''$handle'' resource into ''$meta''.
@@ -71,7 +73,8 @@ $response = file_get_contents(
 );
 </code>
 
-In this example:
+Here is a walk-through of this example.
+
 - '''http''' is the streams wrapper being used.
 - '''POST''' is the HTTP method of the request.
 - The '''header''' stream context setting is populated with a string containing HTTP header key-value pairs, in this case for the Content-Type and Referer HTTP headers. The Content-Type header is used to indicate that the request body data is URL-encoded. When multiple custom headers are needed, they must be separated by a carriage return-line feed ("\r\n" also known as CRLF) sequences. The ''implode'' function is useful for this if key-value pairs for headers are stored in an enumerated array.
@@ -185,17 +188,18 @@ $response = curl_exec($ch);
 curl_close($ch);
 </code>
 
-Going line by line again:
+Let's look at this line by line.
+
 - ''curl_init'' is called and passed '''http://localhost.example/path/to/form''' as the URL for the request. Note this parameter is optional and can also be specified by calling ''curl_setopt'' with the cURL session handle (''$ch'' in this case), the ''CURLOPT_URL'' constant, and the URL string.
 - ''curl_setopt'' is called to set the configuration setting represented by the ''CURLOPT_RETURNTRANSFER'' client to have a value of ''true''. This setting will cause ''curl_exec'' to return the HTTP response in a string rather than outputting it directly.
--- ''curl_exec'' is called to have it execute the request and return the response.
--- ''curl_close'' is called to explicitly close the cURL session handle, which will no longer be reusable after that point.
+- ''curl_exec'' is called to have it execute the request and return the response.
+- ''curl_close'' is called to explicitly close the cURL session handle, which will no longer be reusable after that point.
 
 A useful setting worth mentioning early on is ''CURLOPT_VERBOSE'', which outputs debugging information when set to ''true''. This output is sent to either stderr (the default) or the file referenced by the value of the ''CURLOPT_STDERR''.
 
 =2=Contrasting GET and POST=2=
 
-Obviously the cURL extension has other functions, but by and large most HTTP requests made using the cURL extension will follow the sequence of operations shown in the above examples. Let's compare this with a POST request.
+Obviously the cURL extension has other functions, but by and large most HTTP requests made using the cURL extension will follow the sequence of operations shown in the above example. Let's compare this with a POST request.
 
 <code php>
 <?php
@@ -215,12 +219,14 @@ $response = curl_exec($ch);
 curl_close($ch);
 </code>
 
-Differences between this and the previous example:
+Here are the differences between this example and the previous one.
+
 - The URL is passed using the ''curl_setopt'' function this time, just to show how to do it without passing it to the ''curl_init'' function. This is important when reusing cURL session handles with different URLs.
 - ''CURLOPT_POST'' is set to ''true'' to change the request method to POST.
 - ''CURLOPT_POSTFIELDS'' is an associative array or preformatted query string to be used as the data for the request body. Files can be uploaded by specifying a value where the first character is ''@'' and the remainder of the value is a filesystem path to the file intended for upload. 
 
 Here are a few other cURL configuration setting constants related to the request method.
+
 - ''CURLOPT_HTTPGET'': Boolean that, when set to ''true'', explicitly resets the request method to GET if it's been changed from the default.
 - ''CURLOPT_NOBODY'': Boolean that, when set to ''true'', excludes the body from the response by changing the request method to GET.
 - ''CURLOPT_PUT'': Boolean that, when set to ''true'', sets the request method to PUT for file uploads.
@@ -272,7 +278,7 @@ $responsecode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 <code php>
 <?php
 $ch = curl_init();
-curl_setopt_array($ch, CURLOPT_HTTPHEADER, array(
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
     'Accept-Language: en-us,en;q=0.5',
     'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7',
     'Keep-Alive: 300',
@@ -320,7 +326,8 @@ curl_exec($ch);
 curl_close($ch);
 </code>
 
-Here's a quick list of pertinent points:
+Here is a quick list of pertinent points.
+
 - After the first ''curl_exec'' call, cURL will have stored the value of the the Set-Cookie response header returned by the server in the file referenced by '''/path/to/file''' on the local filesystem as per the ''CURLOPT_COOKIEJAR'' setting. This setting value will persist through the second ''curl_exec'' call.
 - When the second ''curl_exec'' call takes place, the ''CURLOPT_COOKIEFILE'' setting will also point to '''/path/to/file'''. This will cause cURL to read the contents of that file and use it as the value for the Cookie request header when the request is constructed.
 - If ''$cookiejar'' is set to an empty string, cookie data will persist in memory rather than a local file. This improves performance (memory access is faster than disk) and security (file storage may be more open to access by other users and processes than memory depending on the server environment).
@@ -493,6 +500,7 @@ $response = $request->send();
 - After ''HttpRequest'' is instantiated, its request method is explicitly set using the constant ''HTTP_METH_POST''. 
 - Request options are passed in this time, specifically the value for the Referer header. They are specified as the fourth parameter of ''http_post_fields'' and via ''setOptions''.
 - As with the GET request, the return values of ''http_post_fields'' and ''send'' are of the same types (string and HttpMessage) as their respective counterparts in the earlier GET example.
+- Because ''http_post_fields'' does not have an object to use in retaining state, it instead allows the option to pass in a fifth parameter ''$info'' in which it will store information about the request and response. See ''http://php.net/http_get'' for an example of the information stored in ''$info''.
 
 {{Alternative Methods and More Options
 
@@ -648,7 +656,7 @@ $opts = array(
 );
 </code>
 
-Alternatively, it can be set using custom headers via the ''headers'' request option, which is formatted as an associative array with header names for keys pointing to corresponding header values (as opposed to cURL, which uses an enumerated array with one header name-value pair per array item). Below is an example of custom headers in a request options array.
+Alternatively, it can be set using custom headers via the ''headers'' request option.
 
 <code php>
 <?php
@@ -733,7 +741,8 @@ if (!PEAR::isError($response)) {
 }
 </code>
 
-A few specifics about the response information methods: 
+Here are a few specifics about the response information methods.
+
 - ''getResponseCode'' returns an integer containing the HTTP status code.
 - ''getResponseReason'' returns a string containing a description that corresponds to the HTTP status code.
 - ''getResponseCookies'' returns ''false'' if no cookies are set; otherwise it returns an enumerated array of associative arrays each of which contains information for an individual cookie such as its name, value, and expiration date. 
@@ -802,7 +811,7 @@ The capabilities of the client described up to this point can all be accomplishe
 
 By default, cookies are persisted automatically across requests without any additional configuration. ''HTTP_Client_CookieManager'' is used internally for this. For custom cookie handling, this class can be extended and an instance of it passed as the third parameter to the client constructor. If this is done, that instance will be used rather than an instance of the native cookie manager class being created by default.
 
-The maximum number of redirects to process can be set using the ''setMaxRedirects'' method of the client class. Internally, requests will be created and sent as needed to process the redirect until a non-redirecting response is received or the maximum redirect limit is reached. In the former case, the client method being called will return an integer containing the response code rather than ''true'' as the request class does. In the latter case, the client method will return an error instance.
+The maximum number of redirects to process can be set using the ''setMaxRedirects'' method of the client class. Internally, requests will be created and sent as needed to process the redirect until a non-redirecting response is received or the maximum redirect limit is reached. In the former case, the client method being called will return an integer containing the response code rather than ''true'' as the request class does. In the latter case, the client method will return an error instance. Note that the client class will processe redirects contained in ''meta'' tags of HTML documents in addition to those performed at the HTTP level.
 
 To retrieve information for the last response received, use the ''currentResponse'' method of the client instance. It will return an associative array containing the keys '''code''', '''headers''', and '''body''' with values corresponding to the return values of request methods ''getResponseCode'', ''getResponseHeader'', and ''getResponseBody'' respectively.
 
@@ -817,8 +826,6 @@ for ($client->rewind(); $client->valid(); $client->next()) {
 </code>
 
 =2=Observing Requests=2=
-
-@todo http://pear.php.net/manual/en/package.http.http-client.http-client.attach.php
 
 Both ''HTTP_Request'' and ''HTTP_Client'' have ''attach'' and ''detach'' methods for adding and removing instances of ''HTTP_Request_Listener''. This class implements the observer design pattern and serves to intercept events that occur during the process of transmitting a request and receiving a response. To create an observer, first create a class that extends ''HTTP_Request_Listener'' as shown below.
 
@@ -835,15 +842,21 @@ class Custom_Request_Listener extends HTTP_Request_Listener
     {
         switch ($event) {
             // Request events
-            case 'connect':     // ...
-            case 'sentRequest': // ...
-            case 'disconnect':  // ...
+            case 'connect':      // handle the 'connect' event
+            case 'sentRequest':  // ...
+            case 'disconnect':   // ...
 
             // Response events
-            case 'gotHeaders':  // ...
-            case 'tick':        // ...
-            case 'gztick':      // ...
-            case 'gotBody':     // ...
+            case 'gotHeaders':   // ...
+            case 'tick':         // ...
+            case 'gztick':       // ...
+            case 'gotBody':      // ...
+
+            // Client events
+            case 'request':      // ...
+            case 'httpSuccess':  // ...
+            case 'httpRedirect': // ...
+            case 'httpError':    // ...
 
             default:
                 PEAR::raiseError('Unhandled error: ' . $event);
@@ -852,16 +865,37 @@ class Custom_Request_Listener extends HTTP_Request_Listener
 }
 </code>
 
-- Declare a constructor that at minimum calls the parent constructor.
-- Declare the ''update'' method with the signature shown. ''$subject'' is the request or client instance to which the listener is attached. ''$event'' is a string containing one of the events shown in the ''switch'' statement. (Note that not all events need to be handled, only those with which you are concerned.) ''$data'' is data specific to events related to reception of the server response.
+- Declare a constructor that calls the parent constructor and performs any needed custom logic.
+- Declare the ''update'' method with the signature shown. ''$subject'' is the request or client instance to which the listener is attached. ''$event'' is a string containing one of the events shown in the ''switch'' statement.
+- ''$data'' is data specific to events related to reception of the server response.
+- Request and response events occur within ''HTTP_Request'' instances. Client events occur within ''HTTP_Client'' instances.
+- Note that not all events need to be handled, only those with which you are concerned.
+
+The ''attach'' method in ''HTTP_Request'' takes a single parameter, a listener instance. The equivalent method in ''HTTP_Client'' takes two parameters, a required listener instance and an optional boolean flag. When the latter is ''false'' (which it is by default), attached listeners will not be propagated to requests created within the client instance. That is, a listener added will not be notified of request and response events, only client events. To have an added listener receive all events, explicitly specify the ''$propagate'' parameter to be ''true'' when calling ''attach''.
 
 {{PEAR References
 
-For more information on the PEAR packages covered here, see these resources:
+For more information on the PEAR packages covered here, see these resources.
+
 - http://pear.php.net/manual/en/package.http.http-request.php 
 - http://pear.php.net/manual/en/package.http.http-client.php 
 - http://pear.php.net/manual/en/package.http.http-request.listeners.php}} 
 
 =1=Zend_Http_Client=1=
 
+Zend Framework (often abbreviated ZF) was conceived in early 2005. Contrary to PEAR1, ZF tends to remain relatively current in the version of PHP it requires and often takes advantage of features available in newer versions. As of ZF 1.7.0, PHP 5.2.4 is required.
+
+Designed to take full advantage of the new object system introduced in PHP 5, ZF has a fully object-oriented API. The project team strives to maintain an E_STRICT level of compliance and good code coverage via unit testing.
+
+Among the components included in ZF is Zend_Http_Client, an HTTP client library with a fairly comparable feature set to the others already covered in this chapter and the topic of this section.
+
+{{Zend_Http_Client References
+
+For the reference guide section on Zend_Http_Client, see http://framework.zend.com/manual/en/zend.http.html.
+For API documentation on all classes in the Zend_Http package, see http://framework.zend.com/apidoc/core/classtrees_Zend_Http.html.}}
+
 =1=Rolling Your Own=1=
+
+First, it should go without saying that it's generally better to use and build upon an existing library rather than trying to roll your own from scratch. For one thing, you can get a number of features "for free" that way with no work required on your part. For another, developers outside of your team and projects work on those libraries, and in the words of Eric S. Raymond, "Given enough eyes, all bugs are shallow."
+
+Be that as it may, you're likely to pursue doing this if you've read this far, so let's proceed.
