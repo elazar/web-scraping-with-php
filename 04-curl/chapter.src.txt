@@ -1,0 +1,263 @@
+=1=cURL Extension=1=
+
+The cURL PHP extension, available since PHP 4.0.2, wraps a library called libcurl that implements client logic for a variety of internet protocols including HTTP and HTTPS. Its API is fairly small and applications of it consist mostly of calls to set configuration options and their respective values.
+
+cURL assumes fewer default configuration values than the HTTP streams wrapper, like whether or not to process redirections and how many of them to process. The disadvantage to this is that, combined with the rich feature set of the extension, PHP code to use cURL is often more verbose than equivalent code using other client libraries.
+
+Like the streams wrapper, the cURL extension is written in C and has the same pros and cons in that respect. cURL uses a session handle (of the PHP resource data type) with which configuration settings can be associated in a similar fashion to how they are associated with contexts for stream wrappers. Also like stream contexts, cURL session handles can be used multiple times to repeat the same operation until passed to the ''curl_close'' function.
+
+The cURL extension is included in the PHP core, but must either be compiled into PHP or installed as a separate extension. Depending on the runtime environment's operating system, this may involve installing a package in addition to the OS PHP package.
+
+=2=Same Story, Second Verse=2=
+
+<code php>
+<?php
+$ch = curl_init('http://localhost.example/');
+curl_setopt($ch, CURLOPT_RETURNTRANSER, true);
+$response = curl_exec($ch);
+curl_close($ch);
+</code>
+
+Let's look at this line by line.
+
+- ''curl_init'' is called and passed '''http://localhost.example/path/to/form''' as the URL for the request. Note this parameter is optional and can also be specified by calling ''curl_setopt'' with the cURL session handle (''$ch'' in this case), the ''CURLOPT_URL'' constant, and the URL string.
+- ''curl_setopt'' is called to set the configuration setting represented by the ''CURLOPT_RETURNTRANSFER'' client to have a value of ''true''. This setting will cause ''curl_exec'' to return the HTTP response in a string rather than outputting it directly.
+- ''curl_exec'' is called to have it execute the request and return the response.
+- ''curl_close'' is called to explicitly close the cURL session handle, which will no longer be reusable after that point.
+
+A useful setting worth mentioning early on is ''CURLOPT_VERBOSE'', which outputs debugging information when set to ''true''. This output is sent to either stderr (the default) or the file referenced by the value of the ''CURLOPT_STDERR''.
+
+=2=Contrasting GET and POST=2=
+
+Obviously the cURL extension has other functions, but by and large most HTTP requests made using the cURL extension will follow the sequence of operations shown in the above example. Let's compare this with a POST request.
+
+<code php>
+<?php
+$data = array(
+    'param1' => 'value1',
+    'param2' => 'value2',
+    'file1' => '@/path/to/file',
+    'file2' => '@/path/to/other/file'
+);
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, 'http://localhost.example/process');
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($ch);
+curl_close($ch);
+</code>
+
+Here are the differences between this example and the previous one.
+
+- The URL is passed using the ''curl_setopt'' function this time, just to show how to do it without passing it to the ''curl_init'' function. This is important when reusing cURL session handles with different URLs.
+- ''CURLOPT_POST'' is set to ''true'' to change the request method to POST.
+- ''CURLOPT_POSTFIELDS'' is an associative array or preformatted query string to be used as the data for the request body. Files can be uploaded by specifying a value where the first character is ''@'' and the remainder of the value is a filesystem path to the file intended for upload. 
+
+Here are a few other cURL configuration setting constants related to the request method.
+
+- ''CURLOPT_HTTPGET'': Boolean that, when set to ''true'', explicitly resets the request method to GET if it's been changed from the default.
+- ''CURLOPT_NOBODY'': Boolean that, when set to ''true'', excludes the body from the response by changing the request method to GET.
+- ''CURLOPT_PUT'': Boolean that, when set to ''true'', sets the request method to PUT for file uploads.
+- ''CURLOPT_CUSTOMREQUEST'': String used to set the request method to one without its own corresponding CURLOPT constant, such as DELETE.
+
+=2=Setting Multiple Options=2=
+
+If you're working with PHP 5.1.3+ you have access to the ''curl_setopt_array'' function, which allows you to pass in an associative array of setting-value values to set with a single call. If you're working with an older version of PHP, the function is relatively easy to write. 
+
+Using this function results in not only less and cleaner code, but in the case of the native C function it also results in fewer function calls and by proxy improved performance.
+
+<code php>
+<?php
+if (!function_exists('curl_setopt_array')) {
+    function curl_setopt_array($ch, array $options) {
+        foreach ($options as $setting => $value) {
+            curl_setopt($ch, $setting, $value);
+        }
+    }
+}
+
+$ch = curl_init();
+$opts = array(
+    CURLOPT_URL => 'http://localhost.example',
+    CURLOPT_RETURNTRANSFER => true
+);
+curl_setopt_array($ch, $opts);
+$response = curl_exec($ch);
+curl_close($ch);
+</code>
+
+=2=Handling Headers=2=
+
+''CURLOPT_HEADER'' holds a boolean flag that, when set to ''true'', will cause headers to be included in the response string returned by ''curl_exec''. 
+
+Another option for getting at some of the data included in the response headers, such as the HTTP response code, is to use the ''curl_getinfo'' function as shown in the following example. For more on what other information this function offers, see its entry in the PHP manual.
+
+<code php>
+<?php
+$ch = curl_init();
+// ...
+$response = curl_exec($ch);
+$info = curl_getinfo($ch);
+$responsecode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+</code>
+
+''CURLOPT_HTTPHEADER'' holds an enumerated array of custom request header name-value pairs formatted like so.
+
+<code php>
+<?php
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    'Accept-Language: en-us,en;q=0.5',
+    'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7',
+    'Keep-Alive: 300',
+    'Connection: keep-alive'
+));
+</code>
+
+=2=Debugging=2=
+
+Previously mentioned in the last section on handling headers, the ''curl_getinfo'' function also enables you to view requests being sent by cURL. This can be quite useful when debugging. Below is an example of this feature in action.
+
+<code php>
+<?php
+$ch = curl_init();
+curl_setopt_array(array(
+    CURLOPT_RETURNTRANSFER => true,
+    CURLINFO_HEADER_OUT => true
+));
+curl_exec($ch);
+$request = curl_getinfo($ch, CURLINFO_HEADER_OUT);
+</code>
+
+- ''CURLOPT_RETURNTRANSFER'' is set to ''true'' in the ''curl_setopt_array'' call even though the return value of ''curl_exec'' isn't captured. This is simply to prevent unwanted output.
+- ''CURLINFO_HEADER_OUT'' is set to ''true'' in the ''curl_setopt_array'' call to indicate that the request should be retained because it will be extracted after the request is made.
+- ''CURLINFO_HEADER_OUT'' is specified in the ''curl_getinfo'' call to limit its return value to a string containing the request that was made.
+
+=2=Cookies=2=
+
+<code php>
+<?php
+$cookiejar = '/path/to/file';
+
+$ch = curl_init();
+
+$url = 'http://localhost.example';
+curl_setopt($ch, CURLOPT_URL, $url); 
+curl_setopt($ch, CURLOPT_COOKIEJAR, $cookiejar);
+curl_exec($ch);
+
+$url = 'http://localhost.example/path/to/form';
+curl_setopt($ch, CURLOPT_URL, $url); 
+curl_setopt($ch, CURLOPT_COOKIEFILE, $cookiejar);
+curl_exec($ch);
+
+curl_close($ch);
+</code>
+
+Here is a quick list of pertinent points.
+
+- After the first ''curl_exec'' call, cURL will have stored the value of the the Set-Cookie response header returned by the server in the file referenced by '''/path/to/file''' on the local filesystem as per the ''CURLOPT_COOKIEJAR'' setting. This setting value will persist through the second ''curl_exec'' call.
+- When the second ''curl_exec'' call takes place, the ''CURLOPT_COOKIEFILE'' setting will also point to '''/path/to/file'''. This will cause cURL to read the contents of that file and use it as the value for the Cookie request header when the request is constructed.
+- If ''$cookiejar'' is set to an empty string, cookie data will persist in memory rather than a local file. This improves performance (memory access is faster than disk) and security (file storage may be more open to access by other users and processes than memory depending on the server environment).
+
+In some instances it may be desirable for the ''CURLOPT_COOKIEJAR'' value to have a different value per request, such as for debugging. In most cases, however, ''CURLOPT_COOKIEJAR'' will be set for the first request to receive the initial cookie data and its value will persist for subsequent requests. In most cases, ''CURLOPT_COOKIEFILE'' will be assigned the same value as ''CURLOPT_COOKIEJAR'' after the first request. This will result in data being read from the file to include in the request, followed by cookie data from the response being written back to the file (and overwriting any existing data in that file) for use in subsequent requests. On a related note, if you want cURL to begin a new session in order to have it discard data for session cookies (i.e. cookies without an expiration date), you can set the ''CURLOPT_COOKIESESSION'' setting to ''true''.
+
+If you want to handle cookie data manually for any reason, you can set the value of the Cookie request header via the ''CURLOPT_COOKIE'' setting. To get access to the response headers, set the ''CURLOPT_HEADER'' and ''CURLOPT_RETURNTRANSFER'' settings to ''true''. This will cause the ''curl_exec'' call to return the entire response including the headers and the body. Recall that there is a single blank line between the headers and the body and that a colon separates each header name from its corresponding value. This information combined with the basic string handling functions in PHP should be all you need. Also, you'll need to set ''CURLOPT_FOLLOWLOCATION'' to ''false'' in order to prevent cURL from processing redirections automatically. Not doing this would cause any cookies set by requests resulting in redirections to be lost.
+
+=2=HTTP Authentication=2=
+
+cURL supports both Basic and Digest HTTP authentication methods, among others. The ''CURLOPT_HTTPAUTH'' setting controls the method to use and is set using constants such as ''CURLAUTH_BASIC'' or ''CURLAUTH_DIGEST''. The ''CURLOPT_USERPWD'' setting is a string containing the authentication credentials to use in the format '''username:password'''. Note that this has to be set for each request requiring authentication.
+
+=2=Redirection=2=
+
+''CURLOPT_FOLLOWLOCATION'' can be set to ''true'' to have cURL automatically place process redirections. That is, it will detect Location headers in the server response and implicitly issue requests until the server response no longer contains a Location header. To set the maximum number of Location headers to have cURL process automatically before terminating, use the ''CURLOPT_MAXREDIRS'' setting. To have authentication credentials persist in requests resulting from redirections, set the ''CURLOPT_UNRESTRICTED_AUTH'' setting to true.
+
+=2=Referers=2=
+
+''CURLOPT_REFERER'' allows you to explicitly set the value of the Referer header. Setting ''CURLOPT_AUTOREFERER'' to ''true'' will cause cURL to automatically set the value of the Referer header whenever it processes a Location header.
+
+=2=Content Caching=2=
+
+''CURLOPT_TIMECONDITION'' must be set to either ''CURL_TIMECOND_IFMODSINCE'' or ''CURL_TIMECOND_IFUNMODSINCE'' to select whether the If-Modified-Since or If-Unmodified-Since header will be used respectively. 
+
+''CURLOPT_TIMEVALUE'' must be set to a UNIX timestamp (a date representation using the number of seconds between the UNIX epoch and the desired date) to indicate the last client access time of the resource. The ''time'' function can be used to derive this value.
+
+=2=User Agents=2=
+
+''CURLOPT_USERAGENT'' can be used to set the User Agent string to use.
+
+=2=Byte Ranges=2=
+
+''CURLOPT_RESUME_FROM'' can be used to set a single point within the document from which to start the response body. This will cause the Range header to be set with a value of X- where X is the specified starting point. 
+
+In order to specify multiple ranges, ''CURLOPT_RANGE'' accepts a string in the same format as the Range header (X-Y or X-).
+
+=2=DNS Caching=2=
+
+You may notice that code using the cURL extension appears to run faster than code using streams. The reason for this is that cURL implements its own DNS cache, which is more likely to be apparent if your operating system or internet service provider does not provide one.
+
+DNS, or Domain Name System, is a system used to derive an IP address for a domain name in a manner similar to how phone directories are used to obtain a phone number for a person using their name. The process of obtaining an IP address for a domain name, called a DNS lookup, can be a costly operation in terms of the time required.
+
+Because the results of DNS lookups don't change often, DNS caching is often used to retain the results of lookups for a certain time period after they are performed. This can be done at multiple levels including the source code level as with cURL, the OS level either natively or via software like nscd or dnsmasq, or at the Internet Service Provider (ISP) level.
+
+cURL DNS caching is enabled by default. Some situations like debugging may warrant disabling it, which can be done by setting ''CURLOPT_DNS_USE_GLOBAL_CACHE'' to ''false''. cURL will also by default retain the results of DNS lookups in memory for two minutes. To change this, set the ''CURLOPT_DNS_CACHE_TIMEOUT'' setting to the number of seconds a result should remain in the cache before expiring.
+
+Also noteworthy is the fact that cURL DNS caching is not thread-safe. Threading is a particular style of parallel processing. The most common implementation of threading consists of multiple threads of execution contained within a single operating system process that share resources such as memory. Because of this, it may operate unpredictably in a threaded environment such as Windows Server or *NIX running a threaded Apache MPM. 
+
+If you are using the HTTP streams wrapper or either of the PHP-based HTTP client libraries covered in this chapter and you have access to install software on your server, you may want to install a local DNS caching daemon to improve performance. Try nscd or dnsmasq on *NIX. Writing DNS caching into your own client will be covered later in this section.
+
+=2=Timeouts=2=
+
+''CURLOPT_CONNECTTIMEOUT'' is a maximum amount of time in seconds to which a connection attempt will be restricted for a cURL operation. It can be set to 0 to disable this limit, but this is inadvisable in a production environment. Note that this time includes DNS lookups. For environments web the DNS server in use or the web server hosting the target application is not particularly responsive, it may be necessary to increase the value of this setting.
+
+''CURLOPT_TIMEOUT'' is a maximum amount of time in seconds to which the execution of individual cURL extension function calls will be limited. Note that the value for this setting should include the value for ''CURLOPT_CONNECTTIMEOUT''. In other words, ''CURLOPT_CONNECTTIMEOUT'' is a segment of the time represented by ''CURLOPT_TIMEOUT'', so the value of the latter should be greater than the value of the former.
+
+=2=Request Pooling=2=
+
+Because it is written C, the cURL extension has one feature that cannot be replicated in libraries written in PHP: the ability to run multiple requests in parallel. What this means is that multiple requests can be provided to cURL all at once and, rather than waiting for a response to be received for the first request moving onto sending the second, all requests will be sent and processed as responses are returned. This can significantly shorten the time required to collectively complete all the requests. However, care should be taken not to overload a single host with requests when using this.
+
+<code php>
+<?php
+$ch1 = curl_init('http://localhost.example/resource1');
+curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+/* other curl_setopt calls */
+
+$ch2 = curl_init('http://localhost.example/resource2');
+curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+/* other curl_setopt calls */
+
+$mh = curl_multi_init();
+curl_multi_add_handle($mh, $ch1);
+curl_multi_add_handle($mh, $ch2);
+
+$running = null;
+do {
+    curl_multi_exec($mh, $running);
+} while ($running > 0);
+
+$ch1_response = curl_multi_getcontent($ch1);
+$ch2_response = curl_multi_getcontent($ch2);
+
+curl_multi_remove_handle($ch1);
+curl_close($ch1);
+
+curl_multi_remove_handle($ch2);
+curl_close($ch2);
+
+curl_multi_close($mh);
+</code>
+
+- Two cURL session handles ''$ch1'' and ''$ch2'' are initialized and configured normally. Note that more than two can be used in this type of operation; two merely satisfy the purpose of this example.
+- A cURL multi handle ''$mh'' is initialized and the two session handles are added to it.
+- A loop is used in conjunction with the flag ''$running'' to repeatedly check (i.e. poll) the multi handle for completion of all contained operations.
+- ''curl_multi_getcontent'' is used on the two session handles to get the response bodies of each.
+- The session handles are individually removed from the multi handle and closed using ''curl_multi_remove_handle'' and ''curl_close'' respectively.
+- The multi handle is closed using ''curl_multi_close''.
+
+{{cURL in the PHP Manual
+
+For more information on the cURL extension, see http://php.net/manual/en/book.curl.php.
+For information on installing the cURL extension, see http://php.net/manual/en/curl.installation.php.
+For information on the cURL extension configuration constants, see http://php.net/manual/en/function.curl-setopt.php.}}

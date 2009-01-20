@@ -1,0 +1,5 @@
+=1=Rolling Your Own=1=
+
+First, it should go without saying that it's generally better to use and build upon an existing library rather than trying to roll your own from scratch. For one thing, you can get a number of features "for free" that way with no work required on your part. For another, developers outside of your team and projects work on those libraries, and in the words of Eric S. Raymond, "Given enough eyes, all bugs are shallow."
+
+Be that as it may, you're likely to pursue doing this if you've read this far, so let's proceed.

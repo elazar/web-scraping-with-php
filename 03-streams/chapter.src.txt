@@ -1,0 +1,161 @@
+=1=HTTP Streams Wrapper=1=
+
+At this point, you should be fairly well-acquainted with some of the general concepts involved in using an HTTP client. The next few chapters will review some of the more popular mainstream client libraries, particularly common use cases and the advantages and disadvantages of each. This client covered in this chapter will be the HTTP streams wrapper.
+
+PHP 4.3 saw the addition of the Streams extension to the core. According to the related section of the PHP manual, the intention was to provide "a way of generalizing file, network, data compression, and other operations which share a common set of functions and uses." Streams introduced several concepts, one of which is a wrapper. The job of a wrapper is to define how a stream handles communications in a specific protocol or using a specific encoding. One such protocol for which a wrapper is available is HTTP.
+
+The advantage to the HTTP streams wrapper is that there is very little to learn in terms of the API. It's fairly easy to get something simple working quickly. The disadvantage is that it's very minimalistic in terms of the feature set offered. It gives you the ability to send HTTP requests without having to construct them entirely on your own (by specifying the body and optionally any headers you want to add) and access data in the response. That's about it. The ability to debug requests is one example of a feature that it does not include at the time of writing.
+
+The fact that the wrapper is written in C is a bit of a double-edged sword. On the positive side, there is a substantial performance difference between C code and PHP code (though it is more noticeable in a high load environment). On the negative side, you have to either know C or depend on the community to deliver patches in a timely fashion for any issues that may arise. This also applies to extensions written in C that will be covered in subsequent sections.
+
+The streams wrapper is part of the PHP core and as such has no installation requirements beyond that of PHP itself.
+
+=2=A Simple Request and Response Handling=2=
+
+Here's a simple example of the HTTP streams wrapper in action.
+
+<code php>
+<?php
+$response = file_get_contents('http://localhost.example');
+print_r($http_response_header);
+</code>
+
+There are a few things to note.
+
+- The ''allow_url_fopen'' PHP configuration setting must be enabled for this to work, which it is in most environments.
+- In this example, the ''file_get_contents'' function call is equivalent to making a GET request for the specified URL '''http://localhost.example'''.
+- ''$response'' will contain the response body after the call to the ''file_get_contents'' function completes.
+- ''$http_response_header'' is implicitly populated with the HTTP response status line and headers after the ''file_get_contents'' call because it uses the HTTP streams wrapper //within the current scope//.
+
+While this example does work, it violates a core principle of good coding practices: no unexpected side effects. The origin of ''$http_response_header'' is not entirely obvious because PHP populates it implicitly. Additionally, it's more restrictive because the variable is only populated within the scope containing the call to ''file_get_contents''. Here's a better way to get access to the same data from the response headers.
+
+<code php>
+<?php
+$handle = fopen('http://localhost.example', 'r');
+$response = stream_get_contents($handle);
+$meta = stream_get_meta_data($handle);
+print_r($meta['wrapper_data']);
+</code>
+
+Let's stepping through this.
+
+- The resource ''$handle'' is created to read from the URL '''http://localhost.example'''.
+- The ''stream_get_contents'' function is called to read the remaining data on the stream pointed to by the ''$handle'' resource into ''$response''.
+- The ''stream_get_meta_data'' function is called to read metadata for the stream pointed to by the ''$handle'' resource into ''$meta''.
+- The '''wrapper_data''' index of the ''$meta'' array outputs the same array as ''$http_response_header'' would within the current scope. So long as ''$handle'' is accessible within the current scope, stream_get_meta_data() can be called on it. This makes it more flexible than '$http_response_header''.
+
+=2=Stream Contexts and POST Requests=2=
+
+Another concept introduced by streams is the context, which is basically a set of configuration options used in a streams operation. A context is created by passing an associative array of context options and their corresponding values to the ''stream_context_create'' function. One use of contexts with regard to the HTTP streams wrapper is making POST requests, as the wrapper uses the GET method by default.
+
+<code php>
+<?php
+$context = stream_context_create(array(
+    'http' => array(
+        'method' => 'POST',
+        'header' => implode("\r\n", array(
+            'Content-Type: application/x-www-form-urlencoded',
+            'Referer: http://localhost.example'
+        )),
+        'content' => http_build_query(array(
+            'param1' => 'value1',
+            'param2' => 'value2'
+        ))
+    )
+));
+
+$response = file_get_contents(
+    'http://localhost.example/process',
+    false,
+    $context
+);
+</code>
+
+Here is a walk-through of this example.
+
+- '''http''' is the streams wrapper being used.
+- '''POST''' is the HTTP method of the request.
+- The '''header''' stream context setting is populated with a string containing HTTP header key-value pairs, in this case for the Content-Type and Referer HTTP headers. The Content-Type header is used to indicate that the request body data is URL-encoded. When multiple custom headers are needed, they must be separated by a carriage return-line feed ("\r\n" also known as CRLF) sequences. The ''implode'' function is useful for this if key-value pairs for headers are stored in an enumerated array.
+- The ''http_build_query'' function is being used to construct the body of the request. This function can also be used to construct query strings of URLs for GET requests.
+- '''http://localhost.example/process''' is the URL of the resource being requested.
+- ''file_get_contents'' is called to execute the request, the options for which are passed via the created context ''$context''.
+- The body of the response is returned and stored in the variable ''$response''.
+
+=2=To Err and Not To Err=2=
+
+Before PHP 5.3.0, an HTTP streams wrapper operation resulting in an HTTP error response (i.e. a 4xx or 5xx status code) causes a PHP-level warning to be emitted. This warning will only contain the HTTP version, the status code, and the status code description. The function calls for such operations generally return ''false'' as a result and leave you without a stream resource to check for more information. Here's an example of how to get what data you can.
+
+<code php>
+<?php
+function error_handler($errno, $errstr, $errfile, $errline,
+    array $errcontext) {
+
+    // $errstr will contain something like this:
+    // fopen(http://localhost.example/404): failed to open stream: 
+    // HTTP request failed! HTTP/1.0 404 Not Found
+
+    if ($httperr = strstr($errstr, 'HTTP/')) {
+
+        // $httperr will contain HTTP/1.0 404 Not Found in the case
+        // of the above example, do something useful with that here
+    }
+}
+
+set_error_handler('error_handler', E_WARNING);
+
+// If the following statement fails, $stream will be assigned false
+// and error_handler will be called automatically
+$stream = fopen('http://localhost.example/404', 'r');
+
+// If error_handler() does not terminate the script, control will
+// be returned here once it completes its execution
+restore_error_handler();
+</code>
+
+This situation has been improved somewhat in PHP 5.3 with the addition of the ''ignore_errors'' context setting. When this setting is set to ''true'', operations resulting in errors are treated the same way as successful operations. Here's an example of what that might look like.
+
+<code php>
+<?php
+$context = stream_context_create(
+    array(
+        'http' => array(
+            'ignore_errors' => true
+        )
+    )
+);
+
+$stream = fopen('http://localhost.example/404', 'r', false, $context);
+
+// $stream will be a stream resource at this point regardless of
+// the outcome of the operation
+$body = stream_get_contents($stream);
+$meta = stream_get_meta_data($stream);
+
+// $meta['wrapper_data'][0] will equal something like HTTP/1.0 404
+// Not Found at this point, with subsequent array elements being
+// other headers
+$response = explode(' ', $meta['wrapper_data'][0], 3);
+list($version, $status, $description) = $response;
+switch (substr($status, 0, 1)) {
+    case '4':
+    case '5':
+        $result = false;
+    default:
+        $result = true;
+}
+</code>
+
+=2=Few More Options, Then Do-It-Yourself=2=
+
+Below are a few other stream context options for the HTTP streams wrapper that may prove useful.
+
+- '''user_agent''' allows you to set the user agent string to use in the operation. This can also be set manually by specifying a value for the User-Agent header in the '''header''' context option value.
+- '''max_redirects''' is used to set the maximum number of redirections that the operation will process prior to assuming that the application is misbehaving and terminating the request. This option is only available in PHP 5.1.0 and up and uses a default value of 20.
+- ''timeout'' is used to set a maximum limit on the amount of time in seconds that a read operation may be allowed to execute before it is terminated. It defaults to the value of the ''default_socket_timeout'' PHP configuration setting.
+
+All other features utilizing headers must be implemented manually by specifying request headers in the '''header''' context option and checking either ''$http_response_header'' or the '''wrapper_data''' index of the array returned by the ''stream_get_meta_data'' function for response headers. 
+
+{{HTTP Streams Wrapper in the PHP Manual
+
+For more information about the HTTP streams wrapper itself, see http://www.php.net/manual/en/wrappers.http.php.
+For details about the context options specific to the wrapper, see http://www.php.net/manual/en/context.http.php.}}

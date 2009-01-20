@@ -1,0 +1,199 @@
+=1=Zend_Http_Client=1=
+
+Zend Framework (often abbreviated ZF) was conceived in early 2005. Contrary to PEAR1, ZF tends to remain relatively current in the version of PHP it requires and often takes advantage of features available in newer versions. As of ZF 1.7.0, PHP 5.2.4 is required.
+
+Designed to take full advantage of the new object system introduced in PHP 5, ZF has a fully object-oriented API. The project team strives to maintain an E_STRICT level of compliance and good code coverage via unit testing.
+
+Among the components included in ZF is ''Zend_Http_Client'', an HTTP client library with a fairly comparable feature set to the others already covered in this chapter. With that, let's move into how it works.
+
+=2=Beginning Again=2=
+
+Let's start with a basic request.
+
+<code php>
+<?php
+$client = new Zend_Http_Client;
+$client->setUri('http://localhost.example');
+$response = $client->request();
+
+// This does the same thing
+$client = new Zend_Http_Client('http://localhost.example');
+$response = $client->request('GET');
+
+// Another way to set the request method
+$client->setMethod(Zend_Http_Client::GET);
+</code>
+
+- The URL for the request can either be passed as the first parameter to the ''Zend_Http_Client'' constructor or via the ''setUri'' method after the client instance is created. Both methods accept the URI as either a string or an instance of ''Zend_Uri_Http''.
+- The ''request'' method of the client is used to dispatch the request, taking an optional parameter of a string containing the HTTP request method to use. GET is used by default. The HTTP request method can also be set via the client ''setMethod'' method using the client class constant named for that HTTP request method.
+
+=2=Responses=2=
+
+The response returned by the client's ''request'' method has a number of useful accessor methods.
+
+<code php>
+// Returns an integer containing the status code
+var_dump($response->getStatus());
+
+// Returns a string containing a description for the status code 
+var_dump($response->getMessage());
+
+// Returns a string containing the fully decoded response body
+var_dump($response->getBody());
+
+// Returns a string containing the unaltered response body
+var_dump($response->getRawBody());
+
+// Returns an associative array of headers
+var_dump($response->getHeaders());
+
+// Returns a string or array of values for a single header
+var_dump($response->getHeader('Content-Type'));
+
+// Returns TRUE for 100- and 200-level status codes
+var_dump($response->isSuccessul());
+
+// Returns TRUE for 400- and 500-level status codes
+var_dump($response->isError());
+</code>
+
+=2=URL Handling=2=
+
+By default, ''Zend_Http_Client'' uses ''Zend_Uri_Http'' to validate any URI that is passed into the client. Use of unconventional URLs, particularly those using characters described as disallowed by section 2.4.3 of RFC 2396 (the predecessor to RFC 3986), may cause validation failure. See the code sample below for how to deal with this situation.
+
+<code php>
+<?php
+// $valid will be false because the URL contains a | 
+$valid = Zend_Uri::check('http://localhost.example/?q=this|that');
+
+// Force URLs with disallowed characters to be considered valid
+Zend_Uri::setConfig(array('allow_unwise' => true));
+
+// $valid will be true because of allow_unwise being enabled
+$valid = Zend_Uri::check('http://localhost.example/?q=this|that');
+
+// URLs with disallowed characters will be considered invalid again 
+Zend_Uri::setConfig(array('allow_unwise' => false));
+</code>
+
+=2=Custom Headers=2=
+
+The ''setHeaders'' method is the Swiss Army Knife of header management for ''Zend_Http_Client''. See the example below for the multitude of ways in which headers can be set.
+
+<code php>
+<?php
+// Single header, with header name and value separate
+$client->setHeaders('Host', 'localhost.example');
+
+// Single header, with header name and value together
+$client->setHeaders('Host: localhost.example');
+
+// Single header with multiple values, mainly useful for cookies
+$client->setHeaders('Cookie', array(
+    'lang=en-US',
+    'PHPSESSID=1a0b82148815944c548caef5ccb884c9'
+));
+
+// Multiple headers, with header names and values separate
+$client->setHeaders(array(
+    'Host' => 'localhost.example',
+    'User-Agent' => 'Zend_Http_Client 1.7.2'
+));
+
+// Multiple headers, with header names and values together
+$client->setHeaders(array(
+    'Host: localhost.example',
+    'User-Agent: Zend_Http_Client 1.7.2'
+));
+</code>
+
+=2=Configuration=2=
+
+''Zend_Http_Client'' has configuration settings much like the context options of the HTTP streams wrapper, configuration settings of the cURL extension, and request options of the pecl_http extension. As shown in the example below, settings are declared in the form of an associative array of setting name-value pairs and can be passed either as the second parameter to the ''Zend_Http_Client'' constructor or later via its ''setConfig'' method. 
+
+<code php>
+<?php
+$config = array('timeout' => 30);
+
+// One way
+$client = new Zend_Http_Client('http://localhost.example', $config);
+
+// Another way
+$client->setConfig($config);
+</code>
+
+=2=Connectivity=2=
+
+The ''timeout'' configuration setting is an integer value specifying the number of seconds for which the client should attempt to connect to the server before timing out. In the event of a timeout, an instance of the exception ''Zend_Http_Client_Adapter_Exception'' will be thrown.
+
+By default, the client assumes that only one request will be performed on the connection it establishes. That is, it will automatically include a ''Connection'' header with a value of ''close''. When sending multiple requests to the same host, the ''keepalive'' configuration can be set to ''true'' to have all requests sent on the same connection for improved performance.
+
+=2=Debugging=2=
+
+The last request sent by the client can be obtained in the form of a string via its ''getLastRequest'' method. For the last response received, the corresponding method ''getLastResponse'' can be called. This returns an instance of ''Zend_Http_Response'' rather than a string. To convert this object to a string, call its ''asString'' method. See below for examples of both.
+
+<code php>
+<?php
+$requestString = $client->getLastRequest();
+$responseObject = $client->getLastResponse();
+$responseString = $responseObject->asString();
+</code>
+
+Note that the ''storeresponse'' configuration setting affects how ''getLastResponse'' behaves. When set to ''true'' (the default), it causes the last response received by the client to be stored for later retrieval. When it is set to ''false'', the response is not stored and is only available as the return value of the client's ''request'' method. In this case, ''getLastResponse'' would return ''null''. If you don't needed the additional availability of the response, turning this off can lessen resource usage. 
+
+=2=Cookies=2=
+
+''Zend_Http_Client'' will accept manually specified cookie name-value pairs via its ''setCookie'' method, but by default will not automatically retain response cookies and resend them in subsequent requests. To have it do so, simply call ''setCookieJar'' with no parameters. This will cause an instance of the default cookie handling class, ''Zend_Http_CookieJar'', to be implicitly instantiated.
+
+If you need access to cookie data for something other than propagating it to subsequent requests, there are a few ways to do so. Cookies can be accessed individually via the cookie jar's ''getCookie'' method, the required parameters for which are a URI and a cookie name.
+
+<code php>
+<?php
+$cookie = $client->getCookieJar()->getCookie(
+    'http://localhost.example/',
+    'cookiename'
+);
+</code>
+
+Note that the URI includes a scheme (''http://''), a domain (''localhost.example''), and a path (''/''). A single cookie jar instance can store cookie data for multiple domains and multiple paths on the same domain. In cases where the latter capability is not used, the path ''/'' can be specified so that all cookies set on the specified domain are available to all paths under that domain. The ''getMatchingCookies'' method of ''Zend_Http_CookieJar' allows cookies to be accessed collectively based on these criteria and returns an array of ''Zend_Http_Cookie'' objects by default. See below for examples.
+
+<code php>
+<?php
+// All cookies for the domain localhost.example
+$cookies = $cookiejar->getMatchingCookies(
+    'http://localhost.example/'
+);
+
+// All cookies for the domain localhost.example with a path or 
+// subpath of /some/path
+$cookies = $cookiejar->getMatchingCookies(
+    'http://localhost.example/some/path'
+);
+
+// All non-session cookies for the domain localhost.example 
+$cookies = $cookiejar->getMatchingCookies(
+    'http://localhost.example/',
+    false
+);
+</code>
+
+Alternatively, ''getAllCookies'' can be used to access all cookies contained in the cookie jar instance. When a cookie jar is only used to store cookies for a single domain, ''getAllCookies'' offers a more concise method than ''getMatchingCookies'' to retrieve all cookies for that domain. Like ''getMatchingCookies'', ''getAllCookies'' also returns an array of ''Zend_Http_Cookie'' objects by default. 
+
+=2=Redirection=2=
+
+The ''maxdirects'' configuration setting is an integer indicating the maximum number of redirections to perform before terminating. Upon termination, the client will simply return the last response it received. The ''isRedirect'' method of ''Zend_Http_Response'' returns ''true'' for responses with a 300-level status code. 
+
+Sections 10.3.2 and 10.3.3 of RFC 2616 indicate that when a redirection occurs, both the request method and parameters should be retained. In practice , most clients don't behave this way. Instead, parameters are cleared and the method reverts to GET. For consistency with other clients, ''Zend_Http_Client'' behaves this way by default. To force it to be compliant with the RFC, the ''strictredirects'' configuration setting can be set to ''true''.
+
+=2=User Agents=2=
+
+The ''useragent'' configuration setting contains the user agent string touse and defaults to '''Zend_Http_Client'''.
+
+=2=HTTP Authentication=2=
+
+As of writing, ''Zend_Http_Client'' only supports Basic HTTP authentication. According to the Zend Framework Reference Guide, support for Digest is planned. To set HTTP authentication credentials, call the client's ''setAuth'' method and pass in the username and password.
+
+{{Zend_Http_Client References
+
+For the reference guide section on Zend_Http_Client, see http://framework.zend.com/manual/en/zend.http.html.
+For API documentation on all classes in the Zend_Http package, see http://framework.zend.com/apidoc/core/classtrees_Zend_Http.html.}}

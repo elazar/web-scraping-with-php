@@ -1,0 +1,270 @@
+=1=pecl_http PECL Extension=1=
+
+The pecl_http extension became available in PHP 5 and gained a class for HTTP responses in PHP 5.1. Like the cURL extension, it also wraps the libcurl library and has similar advantages as a result, such as its internal DNS cache. While the cURL extension uses resources and configuration options to more closely mimic libcurl's own API, the pecl_http extension offers the same features in the form of procedural and object-oriented APIs. As a result, code that uses pecl_http is generally shorter than equivalent code using the cURL extension.
+
+Another major difference is that the cURL extension is considered to be part of the PHP core, which means that it is more likely to be present in most environments supporting PHP. In contrast, pecl_http must be installed via the pecl installer or compiled manually from source. In either case, the extension requires the PHP and libcurl development headers to be present in order to compile properly. Not technically being part of the PHP core, it is less likely to be present or available in shared hosting environments depending on the hosting provider. This may be a concern for code that is intended to be distributed for use in a variety of environments.
+
+To install pecl_http via the pecl installer, PEAR must be installed. See http://pear.php.net/manual/en/installation.php. A package for PEAR may also be available through your OS package manager. Once it is installed, simply issue the command ''pecl install pecl_http''. To install from source, download the latest version from http://pecl.php.net/get/pecl_http. Note that this requires the header files for the PHP version you are using, which are contained in the PHP source tarballs available for download at http://www.php.net/downloads.php or possibly also through your OS package manager.
+
+=2=Back to Basics=2=
+
+<code php>
+<?php
+// Procedural
+$response = http_get('http://localhost.example', null, $info);
+
+// Object-oriented
+$request = new HttpRequest('http://localhost.example');
+$response = $request->send();
+</code>
+
+- After the ''http_get'' call, ''$response'' will be a string containing the body of the response and ''$info'' will contain an associative array with information about the request and response. ''null'' is used in place of an array of request options that will be covered in more detail shortly.
+- The ''HttpRequest'' block is an object-oriented equivalent of the ''http_get'' procedural call and offers a more explicit (albeit slightly less concise) API for setting and getting data about the request and response.
+- The constructor for the ''HttpRequest'' class has two additional parameters than those shown here, a constant representing the request method (the default is ''HTTP_METH_GET'' for a GET request) and an associative array of request options as included in the ''http_get'' block.
+
+=2=Moving On=2=
+
+<code php>
+<?php
+$data = array(
+    'param1' => 'value1',
+    'param2' => 'value2'
+);
+
+$files = array(
+    array(
+        'name' => 'file1',
+        'type' => 'image/jpeg',
+        'file' => '/path/to/file1.jpg'
+    ),
+    array(
+        'name' => 'file2',
+        'type' => 'image/gif',
+        'file' => '/path/to/file2.gif'
+    )
+);
+
+$options = array(
+    'referer' => 'http://localhost.example/'
+);
+
+// Procedural
+$response = http_post_fields(
+    'http://localhost.example/process', 
+    $data, 
+    $files, 
+    $options, 
+    $info
+);
+
+// Object-oriented
+$request = new HttpRequest();
+$request->setUrl('http://localhost.example/process');
+$request->setMethod(HTTP_METH_POST);
+$request->setPostFields($data);
+$request->setPostFiles($files);
+$request->setOptions($options);
+$response = $request->send();
+</code>
+
+- ''http_post_fields'', ''setPostFields'', and ''setPostFiles'' are used to set the request method to POST and to specify that the extension should handle constructing and encoding the POST body with the provided data. If you are handling this aspect of the request yourself, use ''http_post_data'' or ''setRawPostData'' instead.
+- ''setUrl'' is used to set the URL of the HttpRequest instance rather than the constructor, just as an example.
+- After ''HttpRequest'' is instantiated, its request method is explicitly set using the constant ''HTTP_METH_POST''. 
+- Request options are passed in this time, specifically the value for the Referer header. They are specified as the fourth parameter of ''http_post_fields'' and via ''setOptions''.
+- As with the GET request, the return values of ''http_post_fields'' and ''send'' are of the same types (string and HttpMessage) as their respective counterparts in the earlier GET example.
+- Because ''http_post_fields'' does not have an object to use in retaining state, it instead allows the option to pass in a fifth parameter ''$info'' in which it will store information about the request and response. See ''http://php.net/http_get'' for an example of the information stored in ''$info''.
+
+{{Alternative Methods and More Options
+
+For request method constants beyond GET and POST used by the procedural API, see http://php.net/manual/en/http.constants.php.
+For more on available request options for both APIs, see http://php.net/manual/en/http.request.options.php.}}
+
+=2=Handling Headers=2=
+
+When using the procedural API, limited request header information is available via the ''$info'' parameter of functions to issue requests. Response headers are included in the string returned by those function calls. When the string is passed to ''http_parse_message'', it returns an object with a ''headers'' property, which is an associative array of header values indexed by header name.
+
+Custom request headers can be set via the ''headers'' request option, which is formatted as an associative array with header names for keys pointing to corresponding header values (as opposed to cURL, which uses an enumerated array with one header name-value pair per array item). Below is an example of custom headers in a request options array.
+
+<code php>
+<?php
+$opts = array(
+    'headers' => array(
+        'User-Agent' => 'Mozilla/5.0 (X11; U; ...',
+        'Connection' => 'keep-alive'
+    )
+);
+$request = new HttpRequest();
+$request->setOptions($opts);
+</code>
+
+The object-oriented API offers several slightly less cumbersome solutions as shown in the examples below.
+
+<code php>
+<?php
+$request = new HttpRequest();
+// configure $request
+$request->send();
+
+// only returns custom set request headers
+print_r($request->getHeaders());
+
+// returns all request headers
+$requestmessage = $request->getRequestMessage();
+print_r($requestmessage->getHeaders());
+
+// returns a specific request header
+echo $requestmessage->getHeader('User-Agent');
+
+// both return all response headers
+$responsemessage = $request->getResponseMessage();
+print_r($responsemessage->getHeaders());
+print_r($request->getResponseHeader());
+
+// both return a single response header
+echo $responsemessage->getHeader('Content-Length');
+echo $request->getResponseHeader('Content-Length');
+</code>
+
+=2=Debugging=2=
+
+Debugging transmitted requests and responses with pecl_http is actually pretty simple. Configure and send a request, then call the ''getRawRequestMessage'' and ''getRawResponseMessage'' methods on the request instance as shown below.
+
+<code php>
+<?php
+$request = new HttpRequest('http://localhost.example/index.php');
+// configure $request
+$request->send();
+
+// returns a string containing the entire request
+echo $request->getRawRequestMessage();
+
+// returns a string containing the entire response
+echo $request->getRawResponseMessage();
+</code>
+
+=2=Timeouts=2=
+
+As with cURL, pecl_http has options for handling timeouts. 
+
+The ''timeout'' request option, which corresponds to ''CURLOPT_TIMEOUT'', is the maximum number of seconds an entire request may take before timing out.
+
+Likewise the ''connecttimeout'' request option, the counterpart for ''CURLOPT_CONNECTTIMEOUT'', is the maximum number of seconds that a connection attempt, which includes DNS resolution, may take.
+
+Finally the ''dns_cache_timeout'' request option, which is equivalent to ''CURLOPT_DNS_CACHE_TIMEOUT'', is the maximum number of seconds that a DNS cache entry will be retained and defaults to 120 seconds (two minutes).
+
+=2=Cookies=2=
+
+<code php>
+<?php
+$requestcookies = array(
+    'foo' => 'foovalue',
+    'bar' => 'barvalue'
+);
+
+$cookiejar = '/path/to/cookiejar';
+
+// Procedural
+$options = array(
+    'cookie' => $requestcookies, 
+    // - OR -
+    'cookiestore' => $cookiejar 
+);
+
+$response = http_get('http://localhost.example', $options);
+$parsedresponse = http_parse_message($response);
+$responsecookies = array_map(
+    'http_parse_cookie', 
+    $parsedresponse->headers['Set-Cookie']
+);
+
+// Object-oriented
+$request = new HttpRequest('http://localhost.example');
+$request->enableCookies();
+$request->setCookies($cookies);
+$request->addCookies(array('baz' => 'bazvalue'));
+$request->send();
+$responsecookies = $request->getResponseCookies();
+</code>
+
+- Like cURL, pecl_http allows cookie data to be specified manually. Unlike cURL, pecl_http handles most of the formatting for you. Simply specify an associative array of cookie name-value pairs for the ''cookie'' request option. If your cookie values are already encoded, set the ''encodecookies'' request option to ''false''.
+- Also like cURL, pecl_http includes an option to use a file for storing cookie data. Unlike cURL, pecl_http always uses the same file for both read and write operations. That is, it consolidates the ''CURLOPT_COOKIEFILE'' and ''CURLOPT_COOKIEJAR'' options into the ''cookiestore'' request option.
+- Because the procedural API lacks the persistent scope that is a defining characteristic of the object-oriented API, extracting cookie values for uses beyond storage and persistence is somewhat involved. ''http_parse_message'' is used to parse the headers and body from a string containing an HTTP response message into an object for easier access. ''http_parse_cookie'' is then applied to Set-Cookie header values to parse the cookie data from them.
+- In ''HttpRequest'' the ''enableCookies'' method explicitly sets ''CURLOPT_COOKIEFILE'' to an empty string so that cookie data is persisted in memory. ''setCookies'' accepts an associative array of cookie name-value pairs just like the ''cookie'' request option. ''addCookies'' does the same thing, but merges the array contents into any existing cookie data rather than deleting the latter as ''setCookies'' does.
+- Once the ''send'' method is called on ''$request'', cookie data from the response is retrieved by calling the ''getResponseCookies'' method.
+
+=2=HTTP Authentication=2=
+
+The ''httpauth'' request option is used to set credentials in the format ''username:password''. The type of HTTP authentication to use is specified via the ''httpauthtype'' request option using one of the pecl_http ''HTTP_AUTH_*'' constants, which are similar to those intended for the same purpose in the cURL extension. 
+
+Lastly, ''unrestrictedauth'' can be set to ''true'' if authentication credentials should be included in requests resulting from redirections pointing to a different host from the current one.
+
+=2=Redirection and Referers=2=
+
+Intuitively, the ''redirect'' request option is used to set the maximum number of redirections to process before automatically terminating. Not so intuitively, it defaults to 0, which means that processing of redirections is disabled and you must explicitly set this request option to a value greater than 0 to enable it. 
+
+The ''referer'' request option can be used to set the value of the Referer request header. Alternatively, it can be set via the ''headers'' request option (more on that shortly) when using the procedural API or the ''setHeaders'' and ''addHeaders'' methods of the ''HttpRequest'' class when using the object-oriented API.
+
+=2=Content Caching=2=
+
+The ''lastmodified'' request option accepts a UNIX timestamp to be used as the value for the If-Modified-Since or If-Unmodified-Since request header. 
+
+Likewise, the ''etag'' request option accepts a string to be used as the value for the If-Match or If-None-Match request header.
+
+=2=User Agents=2=
+
+The ''useragent'' request option can be used to set a custom user agent string for the request. 
+
+=2=Byte Ranges=2=
+
+Like cURL, pecl_http includes request options for a single resume point and multiple byte ranges. The former is ''resume'' and accepts an integer for the starting point. The latter is ''range'' and is formatted as an array of enumerated arrays each containing a pair of integers representing a single byte range. What follows is an example of setting byte ranges within a request options array.
+
+<code php>
+<?php
+$opts = array(
+    'range' => array(
+        array(1, 1024), // bytes 1-1024, i.e. the first KB
+        array(3073, 4096) // bytes 3073-4096, i.e. third KB
+    )
+);
+</code>
+
+Alternatively, it can be set using custom headers via the ''headers'' request option.
+
+<code php>
+<?php
+$opts = array(
+    'headers' => array(
+        'User-Agent' => 'Mozilla/5.0 (X11; U; ...',
+        'Connection' => 'keep-alive'
+    )
+);
+</code>
+
+=2=Request Pooling=2=
+
+pecl_http also inherits cURL's support for request pooling, or sending and processing multiple requests in parallel. Like other features, pecl_http implements it in a more succinct fashion. Oddly enough, it is one feature that is limited to pecl_http's object-oriented API and has no equivalent in its procedural API. It is implemented in the form of the ''HttpRequestPool'' class.
+
+<code php>
+<?php
+$request1 = new HttpRequest();
+// configure $request1
+
+$request2 = new HttpRequest();
+// configure $request2
+
+$request3 = new HttpRequest();
+// configure $request3
+
+$pool = new HttpRequestPool($request1, $request2);
+$pool->attach($request3);
+$pool->send();
+</code>
+
+- The ''HttpRequestPool'' constructor accepts a variable number of arguments, all of which should be preconfigured ''HttpRequest'' instances.
+- Request instances can also be added via the ''attach'' method of the ''HttpRequestPool'' class.
+- ''send'' is called on the pool instance to transmit all requests and blocks until all responses are received. Once complete, all request instances contain their respective sets of response data as if they had been sent individually.
+
+{{pecl_http in the PHP Manual
+
+For more information on the pecl_http extension, see http://php.net/http.
+For more information on its request options, http://php.net/manual/en/http.request.options.php.}}
