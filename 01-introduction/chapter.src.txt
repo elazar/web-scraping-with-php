@@ -6,6 +6,10 @@ If you are looking to get an idea of what this book is about or whether you are 
 
 This book is targeted at developers of an intermediate or advanced level who already have a fair amount of comfort programming with PHP 5. You should be aware of object-oriented programming principles such as inheritance, abstraction, and encapsulation as well as how these principles relate to the PHP 5 object model. The book will detail general concepts and use PHP as a (very qualified) means to the end of illustrating these concepts with practical examples. Knowledge of the HTTP protocol, XML concepts and related PHP extensions, or JavaScript will also prove particularly helpful.
 
+=1=Any tips for how to read the book?=1=
+
+If you come across a PHP function with which you are not familiar, try pointing your preferred web browser at http://php.net/functionname where "functionname" is the name of the function in question. This will generally direct you to either that function's entry in the manual or the landing page for the manual section that contains that function entry.
+
 =1=What exactly is web scraping?=1=
 
 Web scraping is a process involving the retrieval a semi-structured document from the internet, generally a web page in a markup language such as HTML or XHTML, and analysis of that document in order to extract specific data from it for use in another context. It is commonly (though not entirely accurately) also known as screen scraping. Web scraping does not technically fall within the field of data mining because the latter implies an attempt to discern semantic patterns or trends in large data sets that have already been obtained. Web scraping applications (also called intelligent, automated, or autonomous agents) are concerned only with obtaining the data itself through retrieval and extraction and can involve data sets of significantly varied sizes.
@@ -42,7 +46,9 @@ You're obviously reading chapter 1 now, which provides a brief introduction to w
 
 Chapter 2 deals with relevant details of the HTTP protocol, as HTTP clients are used in the process of document retrieval. This includes how requests and responses are structured and various headers that are used in each to implement features such as cookies, HTTP authentication, redirection, and more.
 
-Chapter 3 covers specific PHP HTTP client libraries and their features, usage, and advantages and disadvantages of each. It also goes into developing a custom client library and common concerns when using any library including prevention of throttling, access randomization, agent scheduling, and side effects of client-side scripts. 
+Chapters 3-7 cover specific PHP HTTP client libraries and their features, usage, and advantages and disadvantages of each.
+
+Chapter 8 goes into developing a custom client library and common concerns when using any library including prevention of throttling, access randomization, agent scheduling, and side effects of client-side scripts. 
 
 =1=OK, I've done my homework. How do I get started with web scraping?=1=
 
