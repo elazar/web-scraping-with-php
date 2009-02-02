@@ -1,0 +1,197 @@
+=t=Tidying Up=t=
+
+At this point, you should have completed the retrieval phase of the web scraping process and have your raw response body ready and awaiting analysis. Congratulations on making it to the halfway mark.
+
+While other response formats are certainly possible, chances are good that you are dealing with a markup-based language like HTML or XHTML. As such, this chapter and subsequent chapters will deal specifically with those formats. More often than not, HTML will be the language in use.
+
+There are a number of available XML-focused PHP extensions that can deal with markup, which will be reviewed in chapters to follow. While these extensions do provide some support for HTML and are even somewhat forgiving about malformed markup, well-formed XHTML is their ideal input. This being the case, the first step in the analysis process is to perform any necessary cleanup on the response body in order to minimize the number of issues that can be encountered later during analysis.
+
+=1=Validation=1=
+
+The World Wide Web Consortium (W3C) provides a markup validation service in order to promote adherence to web standards. You can access this service by going to http://validator.w3.org. It accepts markup to be tested by URL, file upload, or direct input. This will give you an indication of what issues, if any, your document has with markup malformation.
+
+=1=More Than One Way=1=
+
+There are two ways to proceed in cleaning up markup marlformations. One is manual, involves the use of basic string manipulation functions or regular expression functions, and can quickly become messy and rather unmanageable. The other is more automated and involves using the tidy extension to locate and correct markup issues. While the process is configurable, it obviously lacks the fine-grained control that comes with handling it manually.
+
+The majority of this chapter will focus on using tidy to correct markup issues. For those that tidy cannot handle to your satisfaction, the approach mentioned earlier involving string and regular expression functions is your alternative. Regular expressions will be covered in more detail in a later chapter.
+
+The tidy extension offers two API styles: procedural and object-oriented. Both offer mostly equivalent functionality (relevant differences will be covered later) and which to use is really a matter of preference. Though both API styles use objects of the ''tidy'' class, it is recommended that only one style be used as much as is feasible for the sake of consistency in syntax. Code examples in this chapter will use both styles. 
+
+=1=Input=1=
+
+Before correcting markup issues in a set of markup data, the data has to be parsed into a ''tidy'' object. More often than not markup data will already be contained within a string when it is ready to be parsed, but may also be stored in an external file. See below for example of how to handle either of these cases.
+
+<code php>
+<?php
+// Procedural
+$tidy = tidy_parse_string($string, $config);
+$tidy = tidy_parse_file($filename, $config);
+
+// Object-oriented
+$tidy = new tidy;
+$tidy->parseString($string, $config);
+$tidy->parseFile($filename, $config);
+</code>
+
+=1=Configuration=1=
+
+Like the cURL extension, the tidy extension operates largely on the concept of configuration; hence, ''$config'' parameters are present in all calls in the above example. Unlike most other extensions, this parameter can actually be one of two things: an associative array of setting-value pairs or the path to an external configuration file.
+
+The configuration file format is somewhat similar to individual style settings in a CSS stylesheet. An example is shown below. It's unlikely that a non-developer will need to only the configuration settings and not the PHP source code using tidy as well. As such, separation into an external configuration file is really only useful for the sake of separation and not cluttering source code up with settings. Additionally, because the configuration file is read from disk, it may pose performance concerns when in high use.
+
+<code>
+// single-line comment
+/* multi-line comment */
+indent: false // setting: value
+wrap: 78
+</code>
+
+If using the object-oriented API, an alternative to using configuration files is subclassing the ''tidy'' class and overriding its ''parseString'' and ''parseFile'' methods to automatically include specific configuration setting values. This method allows for easy reuse of tidy configurations. 
+
+<code php>
+<?php
+class mytidy extends tidy {
+    private $_default = array(
+        'indent' => false,
+        'wrap' => 78
+    );
+
+    public function parseFile($filename, $config, $encoding, 
+        $use_include_path=false) {
+        return parent::parseFile(
+            $filename, 
+            array_merge($this->_default, $config), 
+            $encoding, 
+            $use_include_path
+        );
+    }
+
+    public function parseString($filename, $config, $encoding, 
+        $use_include_path=false) {
+        return parent::parseString(
+            $filename, 
+            array_merge($this->_default, $config), 
+            $encoding, 
+            $use_include_path
+        );
+    }
+}
+</code>
+
+- ''array_merge'' is used to consolidate default parameter values in the ''$_default'' property into the specified ''$config'' array. Any parameters specified in the original ''$config'' array will take precedence over corresponding parameters specified in ''$_default''.
+- ''parseFile'' and ''parseString'' pass the modified ''$config'' parameter with all other provided parameters to their respective methods in the ''tidy'' class and return the resulting return value.
+
+=1=Options=1=
+
+Tidy includes a large number of configuration options, only a few of which are relevant in the context of this book. 
+
+Two options deal with output formats applicable for web scraping: ''output-html'' and ''output-xhtml''. Both are specified as boolean values. These options are mutually exclusive, meaning that only one can be set to ''true'' at any given time. Generally ''output-xhtml'' is preferable, but may not always be feasible to use. It's important to compare tidy output to the original document to confirm that correction of document malformations hasn't resulted in data loss.
+
+Other options are useful mainly for debugging purposes and should generally be turned off in production environments. This is a good reason for subclassing the ''tidy'' class to control default option values, so that two separate sets are easily accessible for different development environments.
+
+Three of these options are ''indent'', ''indent-spaces'', and ''indent-attributes''. The first of these, ''indent'', is a boolean value indicating whether tidy should apply indentation to make the hierarchical relationships between elements more visually prominent. ''indent-spaces'' is an integer containing the number of whitespace characters used to denote a single level of indentation, defaulting to 2. Lastly, ''indent-attributes'' is a boolean value indicating whether each individual attribute within an element should begin on a new line. 
+
+Speaking of attributes, ''sort-attributes'' can be set to ''alpha'' in order to have element attributes be sorted alphabetically. It is set to ''none'' by default, which disables sorting.
+
+If lines within a document tend to be long and difficult to read, the ''wrap'' option may be useful. It's an integer representing the number of characters per line that tidy should allow before forcing a new line. It is set to 68 by default and can be disabled entirely by being set to 0.
+
+Having no empty lines to separate blocks can also make markup difficult to read. ''vertical-space'' is a boolean value intended to help with this by adding empty lines for readability. It is disabled by default.
+
+=1=Debugging=1=
+
+As good a job as it does, tidy may not always be able to clean documents. When using tidy to repair a document, it's generally a good idea to check for what issues it encounters.
+
+There are two types of issues to check for when using tidy for web scraping analysis: warnings and errors. Like their PHP counterparts, warnings are non-fatal and generally have some sort of automated response that tidy executes to handle them. Errors are not necessarily fatal, but do indicate that tidy may have no way to handle a particular issue.
+
+All issues are stored in an error buffer regardless of their type. Accessing information in and about this buffer is one area in which the procedural and object-oriented APIs for the tidy extension differ.
+
+<code php>
+<?php
+// Procedural
+$issues = tidy_get_error_buffer($tidy);
+
+// Object-oriented
+$issues = $tidy->errorBuffer;
+</code>
+
+Note that ''errorBuffer'' is a property of the ''$tidy'' object, not a method. Also note the slight difference in naming conventions between the procedural function and the object property, versus the consistency held throughout most other areas of the APIs.
+
+The error buffer contained within a string is in and of itself mostly useless. Below is a code sample derived from a user contributed comment on the PHP manual page for the ''tidy_get_error_buffer'' function. This parses individual components of each issue into arrays where they are more easily accessible. 
+
+<code php>
+<?php
+preg_match_all(
+    '/^(?:line (?P<line>\d+) column (?P<column>\d+) - )?' . 
+    '(?P<type>\S+): (?:\[(?:\d+\.?){4}]:)?(?P<message>.*)?$/m',
+    $tidy->errorBuffer, // or tidy_get_error_buffer($tidy) 
+    $issues, 
+    PREG_SET_ORDER
+);
+
+print_r($issues);
+
+/*
+Example output:
+Array
+(
+    [0] => Array
+         (
+             [0] => line 12 column 1 - Warning: <meta> element not 
+                empty or not closed
+             [line] => 12
+             [1] => 12
+             [column] => 1
+             [2] => 1
+             [type] => Warning
+             [3] => Warning
+             [message] => <meta> element not empty or not closed
+             [4] => <meta> element not empty or not closed
+         )
+)
+*/
+</code>
+
+The tidy extension also provides a way to get at the number of warnings and errors that are encountered without requiring that you manually parse the error buffer. Unfortunately and rather oddly, this is only supported in the procedural API. However, adding it to the object-oriented API by subclassing the ''tidy'' class is fairly simple. Examples of both are shown below.
+
+<code php>
+<?php
+// Procedural
+$warnings = tidy_warning_count($tidy);
+$errors = tidy_error_count($tidy);
+
+// Object-oriented
+class mytidy extends tidy {
+    public function warningCount() {
+        return tidy_warning_count($this);
+    }
+    public function errorCount() {
+        return tidy_error_count($this);
+    }
+}
+</code>
+
+=1=Output=1=
+
+Obtaining the resulting output of tidy repairing a document is fairly simple.
+
+<code php>
+<?php
+// Procedural
+$output = tidy_get_output($tidy);
+
+// Object-oriented
+$output = (string) $tidy;
+</code>
+
+While the object-oriented API offers no public declaration of the magic method ''__toString'', it can be cast to a string as well as output directly using the ''echo'' construct.
+
+=1=That's a Wrap=1=
+
+This concludes the chapter. At this point, you should have your obtained document in a format suitable for input to an XML extension. The following few chapters will be devoted to using specific extensions to searching and extracting data from repaired documents.
+
+{{Tidy References 
+
+For the PHP manual section on the tidy extension, see http://php.net/tidy.
+For documentation on the tidy library itself, see http://tidy.sourceforge.net/#docs.
+For a tidy configuration setting reference, see http://tidy.sourceforge.net/docs/quickref.html.}}
