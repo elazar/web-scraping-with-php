@@ -16,6 +16,7 @@ $response = http_get('http://localhost.example', null, $info);
 // Object-oriented
 $request = new HttpRequest('http://localhost.example');
 $response = $request->send();
+?>
 </code>
 
 - After the ''http_get'' call, ''$response'' will be a string containing the body of the response and ''$info'' will contain an associative array with information about the request and response. ''null'' is used in place of an array of request options that will be covered in more detail shortly.
@@ -65,6 +66,7 @@ $request->setPostFields($data);
 $request->setPostFiles($files);
 $request->setOptions($options);
 $response = $request->send();
+?>
 </code>
 
 - ''http_post_fields'', ''setPostFields'', and ''setPostFiles'' are used to set the request method to POST and to specify that the extension should handle constructing and encoding the POST body with the provided data. If you are handling this aspect of the request yourself, use ''http_post_data'' or ''setRawPostData'' instead.
@@ -95,6 +97,7 @@ $opts = array(
 );
 $request = new HttpRequest();
 $request->setOptions($opts);
+?>
 </code>
 
 The object-oriented API offers several slightly less cumbersome solutions as shown in the examples below.
@@ -123,6 +126,7 @@ print_r($request->getResponseHeader());
 // both return a single response header
 echo $responsemessage->getHeader('Content-Length');
 echo $request->getResponseHeader('Content-Length');
+?>
 </code>
 
 =2=Debugging=2=
@@ -140,6 +144,7 @@ echo $request->getRawRequestMessage();
 
 // returns a string containing the entire response
 echo $request->getRawResponseMessage();
+?>
 </code>
 
 =2=Timeouts=2=
@@ -184,6 +189,7 @@ $request->setCookies($cookies);
 $request->addCookies(array('baz' => 'bazvalue'));
 $request->send();
 $responsecookies = $request->getResponseCookies();
+?>
 </code>
 
 - Like cURL, pecl_http allows cookie data to be specified manually. Unlike cURL, pecl_http handles most of the formatting for you. Simply specify an associative array of cookie name-value pairs for the ''cookie'' request option. If your cookie values are already encoded, set the ''encodecookies'' request option to ''false''.
@@ -226,6 +232,7 @@ $opts = array(
         array(3073, 4096) // bytes 3073-4096, i.e. third KB
     )
 );
+?>
 </code>
 
 Alternatively, it can be set using custom headers via the ''headers'' request option.
@@ -238,6 +245,7 @@ $opts = array(
         'Connection' => 'keep-alive'
     )
 );
+?>
 </code>
 
 =2=Request Pooling=2=
@@ -258,6 +266,7 @@ $request3 = new HttpRequest();
 $pool = new HttpRequestPool($request1, $request2);
 $pool->attach($request3);
 $pool->send();
+?>
 </code>
 
 - The ''HttpRequestPool'' constructor accepts a variable number of arguments, all of which should be preconfigured ''HttpRequest'' instances.

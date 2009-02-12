@@ -16,12 +16,13 @@ $ch = curl_init('http://localhost.example/');
 curl_setopt($ch, CURLOPT_RETURNTRANSER, true);
 $response = curl_exec($ch);
 curl_close($ch);
+?>
 </code>
 
 Let's look at this line by line.
 
 - ''curl_init'' is called and passed '''http://localhost.example/path/to/form''' as the URL for the request. Note this parameter is optional and can also be specified by calling ''curl_setopt'' with the cURL session handle (''$ch'' in this case), the ''CURLOPT_URL'' constant, and the URL string.
-- ''curl_setopt'' is called to set the configuration setting represented by the ''CURLOPT_RETURNTRANSFER'' client to have a value of ''true''. This setting will cause ''curl_exec'' to return the HTTP response in a string rather than outputting it directly.
+- ''curl_setopt'' is called to set the configuration setting represented by the ''CURLOPT_RETURNTRANSFER'' parameter to have a value of ''true''. This setting will cause ''curl_exec'' to return the HTTP response in a string rather than outputting it directly.
 - ''curl_exec'' is called to have it execute the request and return the response.
 - ''curl_close'' is called to explicitly close the cURL session handle, which will no longer be reusable after that point.
 
@@ -47,6 +48,7 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $response = curl_exec($ch);
 curl_close($ch);
+?>
 </code>
 
 Here are the differences between this example and the previous one.
@@ -64,14 +66,14 @@ Here are a few other cURL configuration setting constants related to the request
 
 =2=Setting Multiple Options=2=
 
-If you're working with PHP 5.1.3+ you have access to the ''curl_setopt_array'' function, which allows you to pass in an associative array of setting-value values to set with a single call. If you're working with an older version of PHP, the function is relatively easy to write. 
+If you're working with PHP 5.1.3+ you have access to the ''curl_setopt_array'' function, which allows you to pass in an associative array of setting-value pairs to set with a single call. If you're working with an older version of PHP, the function is relatively easy to write. 
 
 Using this function results in not only less and cleaner code, but in the case of the native C function it also results in fewer function calls and by proxy improved performance.
 
 <code php>
 <?php
 if (!function_exists('curl_setopt_array')) {
-    function curl_setopt_array($ch, array $options) {
+    function curl_setopt_array($ch, $options) {
         foreach ($options as $setting => $value) {
             curl_setopt($ch, $setting, $value);
         }
@@ -86,6 +88,7 @@ $opts = array(
 curl_setopt_array($ch, $opts);
 $response = curl_exec($ch);
 curl_close($ch);
+?>
 </code>
 
 =2=Handling Headers=2=
@@ -101,6 +104,7 @@ $ch = curl_init();
 $response = curl_exec($ch);
 $info = curl_getinfo($ch);
 $responsecode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+?>
 </code>
 
 ''CURLOPT_HTTPHEADER'' holds an enumerated array of custom request header name-value pairs formatted like so.
@@ -114,6 +118,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array(
     'Keep-Alive: 300',
     'Connection: keep-alive'
 ));
+?>
 </code>
 
 =2=Debugging=2=
@@ -129,6 +134,7 @@ curl_setopt_array(array(
 ));
 curl_exec($ch);
 $request = curl_getinfo($ch, CURLINFO_HEADER_OUT);
+?>
 </code>
 
 - ''CURLOPT_RETURNTRANSFER'' is set to ''true'' in the ''curl_setopt_array'' call even though the return value of ''curl_exec'' isn't captured. This is simply to prevent unwanted output.
@@ -154,6 +160,7 @@ curl_setopt($ch, CURLOPT_COOKIEFILE, $cookiejar);
 curl_exec($ch);
 
 curl_close($ch);
+?>
 </code>
 
 Here is a quick list of pertinent points.
@@ -174,9 +181,9 @@ cURL supports both Basic and Digest HTTP authentication methods, among others. T
 
 ''CURLOPT_FOLLOWLOCATION'' can be set to ''true'' to have cURL automatically place process redirections. That is, it will detect Location headers in the server response and implicitly issue requests until the server response no longer contains a Location header. To set the maximum number of Location headers to have cURL process automatically before terminating, use the ''CURLOPT_MAXREDIRS'' setting. To have authentication credentials persist in requests resulting from redirections, set the ''CURLOPT_UNRESTRICTED_AUTH'' setting to true.
 
-=2=Referers=2=
-
-''CURLOPT_REFERER'' allows you to explicitly set the value of the Referer header. Setting ''CURLOPT_AUTOREFERER'' to ''true'' will cause cURL to automatically set the value of the Referer header whenever it processes a Location header.
+=2=Referrers=2=
+ 
+''CURLOPT_REFERER'' allows you to explicitly set the value of the Referrer header. Setting ''CURLOPT_AUTOREFERER'' to ''true'' will cause cURL to automatically set the value of the Referrer header whenever it processes a Location header.
 
 =2=Content Caching=2=
 
@@ -210,7 +217,7 @@ If you are using the HTTP streams wrapper or either of the PHP-based HTTP client
 
 =2=Timeouts=2=
 
-''CURLOPT_CONNECTTIMEOUT'' is a maximum amount of time in seconds to which a connection attempt will be restricted for a cURL operation. It can be set to 0 to disable this limit, but this is inadvisable in a production environment. Note that this time includes DNS lookups. For environments web the DNS server in use or the web server hosting the target application is not particularly responsive, it may be necessary to increase the value of this setting.
+''CURLOPT_CONNECTTIMEOUT'' is a maximum amount of time in seconds to which a connection attempt will be restricted for a cURL operation. It can be set to 0 to disable this limit, but this is inadvisable in a production environment. Note that this time includes DNS lookups. For environments where the DNS server in use or the web server hosting the target application is not particularly responsive, it may be necessary to increase the value of this setting.
 
 ''CURLOPT_TIMEOUT'' is a maximum amount of time in seconds to which the execution of individual cURL extension function calls will be limited. Note that the value for this setting should include the value for ''CURLOPT_CONNECTTIMEOUT''. In other words, ''CURLOPT_CONNECTTIMEOUT'' is a segment of the time represented by ''CURLOPT_TIMEOUT'', so the value of the latter should be greater than the value of the former.
 
@@ -247,6 +254,7 @@ curl_multi_remove_handle($ch2);
 curl_close($ch2);
 
 curl_multi_close($mh);
+?>
 </code>
 
 - Two cURL session handles ''$ch1'' and ''$ch2'' are initialized and configured normally. Note that more than two can be used in this type of operation; two merely satisfy the purpose of this example.
