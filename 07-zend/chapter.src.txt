@@ -22,6 +22,7 @@ $response = $client->request('GET');
 
 // Another way to set the request method
 $client->setMethod(Zend_Http_Client::GET);
+?>
 </code>
 
 - The URL for the request can either be passed as the first parameter to the ''Zend_Http_Client'' constructor or via the ''setUri'' method after the client instance is created. Both methods accept the URI as either a string or an instance of ''Zend_Uri_Http''.
@@ -32,6 +33,7 @@ $client->setMethod(Zend_Http_Client::GET);
 The response returned by the client's ''request'' method has a number of useful accessor methods.
 
 <code php>
+<?php
 // Returns an integer containing the status code
 var_dump($response->getStatus());
 
@@ -55,6 +57,7 @@ var_dump($response->isSuccessul());
 
 // Returns TRUE for 400- and 500-level status codes
 var_dump($response->isError());
+?>
 </code>
 
 =2=URL Handling=2=
@@ -74,6 +77,7 @@ $valid = Zend_Uri::check('http://localhost.example/?q=this|that');
 
 // URLs with disallowed characters will be considered invalid again 
 Zend_Uri::setConfig(array('allow_unwise' => false));
+?>
 </code>
 
 =2=Custom Headers=2=
@@ -105,6 +109,7 @@ $client->setHeaders(array(
     'Host: localhost.example',
     'User-Agent: Zend_Http_Client 1.7.2'
 ));
+?>
 </code>
 
 =2=Configuration=2=
@@ -120,6 +125,7 @@ $client = new Zend_Http_Client('http://localhost.example', $config);
 
 // Another way
 $client->setConfig($config);
+?>
 </code>
 
 =2=Connectivity=2=
@@ -137,6 +143,7 @@ The last request sent by the client can be obtained in the form of a string via 
 $requestString = $client->getLastRequest();
 $responseObject = $client->getLastResponse();
 $responseString = $responseObject->asString();
+?>
 </code>
 
 Note that the ''storeresponse'' configuration setting affects how ''getLastResponse'' behaves. When set to ''true'' (the default), it causes the last response received by the client to be stored for later retrieval. When it is set to ''false'', the response is not stored and is only available as the return value of the client's ''request'' method. In this case, ''getLastResponse'' would return ''null''. If you don't needed the additional availability of the response, turning this off can lessen resource usage. 
@@ -153,9 +160,10 @@ $cookie = $client->getCookieJar()->getCookie(
     'http://localhost.example/',
     'cookiename'
 );
+?>
 </code>
 
-Note that the URI includes a scheme (''http://''), a domain (''localhost.example''), and a path (''/''). A single cookie jar instance can store cookie data for multiple domains and multiple paths on the same domain. In cases where the latter capability is not used, the path ''/'' can be specified so that all cookies set on the specified domain are available to all paths under that domain. The ''getMatchingCookies'' method of ''Zend_Http_CookieJar' allows cookies to be accessed collectively based on these criteria and returns an array of ''Zend_Http_Cookie'' objects by default. See below for examples.
+Note that the URI includes a scheme (''http://''), a domain (''localhost.example''), and a path (''/''). A single cookie jar instance can store cookie data for multiple domains and multiple paths on the same domain. In cases where the latter capability is not used, the path ''/'' can be specified so that all cookies set on the specified domain are available to all paths under that domain. The ''getMatchingCookies'' method of ''Zend_Http_CookieJar'' allows cookies to be accessed collectively based on these criteria and returns an array of ''Zend_Http_Cookie'' objects by default. See below for examples.
 
 <code php>
 <?php
@@ -175,6 +183,7 @@ $cookies = $cookiejar->getMatchingCookies(
     'http://localhost.example/',
     false
 );
+?>
 </code>
 
 Alternatively, ''getAllCookies'' can be used to access all cookies contained in the cookie jar instance. When a cookie jar is only used to store cookies for a single domain, ''getAllCookies'' offers a more concise method than ''getMatchingCookies'' to retrieve all cookies for that domain. Like ''getMatchingCookies'', ''getAllCookies'' also returns an array of ''Zend_Http_Cookie'' objects by default. 
@@ -183,11 +192,11 @@ Alternatively, ''getAllCookies'' can be used to access all cookies contained in 
 
 The ''maxdirects'' configuration setting is an integer indicating the maximum number of redirections to perform before terminating. Upon termination, the client will simply return the last response it received. The ''isRedirect'' method of ''Zend_Http_Response'' returns ''true'' for responses with a 300-level status code. 
 
-Sections 10.3.2 and 10.3.3 of RFC 2616 indicate that when a redirection occurs, both the request method and parameters should be retained. In practice , most clients don't behave this way. Instead, parameters are cleared and the method reverts to GET. For consistency with other clients, ''Zend_Http_Client'' behaves this way by default. To force it to be compliant with the RFC, the ''strictredirects'' configuration setting can be set to ''true''.
+Sections 10.3.2 and 10.3.3 of RFC 2616 indicate that when a redirection occurs, both the request method and parameters should be retained. In practice, most clients don't behave this way. Instead, parameters are cleared and the method reverts to GET. For consistency with other clients, ''Zend_Http_Client'' behaves this way by default. To force it to be compliant with the RFC, the ''strictredirects'' configuration setting can be set to ''true''.
 
 =2=User Agents=2=
 
-The ''useragent'' configuration setting contains the user agent string touse and defaults to '''Zend_Http_Client'''.
+The ''useragent'' configuration setting contains the user agent string to use and defaults to '''Zend_Http_Client'''.
 
 =2=HTTP Authentication=2=
 

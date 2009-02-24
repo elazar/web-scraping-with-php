@@ -21,7 +21,7 @@ $response = $request->send();
 
 - After the ''http_get'' call, ''$response'' will be a string containing the body of the response and ''$info'' will contain an associative array with information about the request and response. ''null'' is used in place of an array of request options that will be covered in more detail shortly.
 - The ''HttpRequest'' block is an object-oriented equivalent of the ''http_get'' procedural call and offers a more explicit (albeit slightly less concise) API for setting and getting data about the request and response.
-- The constructor for the ''HttpRequest'' class has two additional parameters than those shown here, a constant representing the request method (the default is ''HTTP_METH_GET'' for a GET request) and an associative array of request options as included in the ''http_get'' block.
+- The constructor for the ''HttpRequest'' class has two additional optional parameters as well as the one shown here, a constant representing the request method (the default is ''HTTP_METH_GET'' for a GET request) and an associative array of request options as included in the ''http_get'' block.
 
 =2=Moving On=2=
 

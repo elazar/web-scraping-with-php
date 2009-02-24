@@ -1,6 +1,6 @@
 =1=PEAR::HTTP_Client=1=
 
-The PHP Extension and Application Repository (PEAR) project houses a library of reusable components written in PHP and a package system for distributing them, one of which is the ''HTTP_Client'' package that will be covered in the sections to follow. PEAR spurred the creation of the PECL project, a repository of C extensions from which the pecl_http extension discussed in the previous section originates.
+The PHP Extension and Application Repository (PEAR) project houses a library of reusable components written in PHP and a package system for distributing them, one of which is the ''HTTP_Client'' package that will be covered in the section to follow. PEAR spurred the creation of the PECL project, a repository of C extensions from which the pecl_http extension discussed in the previous section originates.
 
 One trait of many components in PEAR is backward compatibility with older versions of PHP. The ''HTTP_Client'' package itself only requires 4.3.0, while the latest and last version of the PHP 4 branch is 4.4.9. As such, this client may be a good solution when feature requirements are more advanced than what the HTTP streams wrapper natively supports and the intended runtime environment is restricted to an older PHP version. Otherwise, if you still want an HTTP client written in PHP, have a look at Zend_Http_Client as described in the next section. It should go without saying that support for PHP 4.x has ceased and that it is highly advisable to run a more current stable version of PHP in production environments.
 
@@ -22,6 +22,7 @@ $request =& HTTP_Request('http://localhost.example');
 $request->setMethod(HTTP_REQUEST_METHOD_GET);
 $request->setURL('http://localhost.example');
 $response = $request->sendRequest();
+?>
 </code>
 
 - The ''HTTP_Request'' constructor has two parameters, both of which are optional. The first is a string containing the URL for the request; note that the ''setURL'' method is an alternative way to specify a value for this. The second is a parameters array, which will be discussed later. 
@@ -40,6 +41,7 @@ if (!PEAR::isError($response)) {
     $headers = $request->getResponseHeader();
     $contentType = $request->getResponseHeader('Content-Type');
 }
+?>
 </code>
 
 Here are a few specifics about the response information methods.
@@ -57,6 +59,7 @@ $request =& new HTTP_Request;
 // ...
 $request->HTTP_Request();
 // all parameters previously set will be cleared
+?>
 </code>
 
 =2=Juggling Data=2=
@@ -81,6 +84,7 @@ $request->clearCookies();
 
 // FILES
 $request->addFile('fieldname', '/path/to/file', 'text/plain');
+?>
 </code>
 
 - ''addRawQueryString'' isn't named very intuitively, as it actually overwrites any query string that you've previously set.
@@ -100,6 +104,7 @@ $request =& new HTTP_Request;
 $request->addHeader('name', 'value');
 $request->removeHeader('name');
 $request->setBasicAuth('username', 'password');
+?>
 </code>
 
 =2=Using the Client=2=
@@ -112,7 +117,7 @@ The capabilities of the client described up to this point can all be accomplishe
 
 By default, cookies are persisted automatically across requests without any additional configuration. ''HTTP_Client_CookieManager'' is used internally for this. For custom cookie handling, this class can be extended and an instance of it passed as the third parameter to the client constructor. If this is done, that instance will be used rather than an instance of the native cookie manager class being created by default.
 
-The maximum number of redirects to process can be set using the ''setMaxRedirects'' method of the client class. Internally, requests will be created and sent as needed to process the redirect until a non-redirecting response is received or the maximum redirect limit is reached. In the former case, the client method being called will return an integer containing the response code rather than ''true'' as the request class does. In the latter case, the client method will return an error instance. Note that the client class will processe redirects contained in ''meta'' tags of HTML documents in addition to those performed at the HTTP level.
+The maximum number of redirects to process can be set using the ''setMaxRedirects'' method of the client class. Internally, requests will be created and sent as needed to process the redirect until a non-redirecting response is received or the maximum redirect limit is reached. In the former case, the client method being called will return an integer containing the response code rather than ''true'' as the request class does. In the latter case, the client method will return an error instance. Note that the client class will process redirects contained in ''meta'' tags of HTML documents in addition to those performed at the HTTP level.
 
 To retrieve information for the last response received, use the ''currentResponse'' method of the client instance. It will return an associative array containing the keys '''code''', '''headers''', and '''body''' with values corresponding to the return values of request methods ''getResponseCode'', ''getResponseHeader'', and ''getResponseBody'' respectively.
 
@@ -124,6 +129,7 @@ for ($client->rewind(); $client->valid(); $client->next()) {
     $url = $client->key();
     $response = $client->current();
 }
+?>
 </code>
 
 =2=Observing Requests=2=
@@ -164,6 +170,7 @@ class Custom_Request_Listener extends HTTP_Request_Listener
         }
     }
 }
+?>
 </code>
 
 - Declare a constructor that calls the parent constructor and performs any needed custom logic.
