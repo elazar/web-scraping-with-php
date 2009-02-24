@@ -32,18 +32,19 @@ $tidy = tidy_parse_file($filename, $config);
 $tidy = new tidy;
 $tidy->parseString($string, $config);
 $tidy->parseFile($filename, $config);
+?>
 </code>
 
 =1=Configuration=1=
 
 Like the cURL extension, the tidy extension operates largely on the concept of configuration; hence, ''$config'' parameters are present in all calls in the above example. Unlike most other extensions, this parameter can actually be one of two things: an associative array of setting-value pairs or the path to an external configuration file.
 
-The configuration file format is somewhat similar to individual style settings in a CSS stylesheet. An example is shown below. It's unlikely that a non-developer will need to only the configuration settings and not the PHP source code using tidy as well. As such, separation into an external configuration file is really only useful for the sake of separation and not cluttering source code up with settings. Additionally, because the configuration file is read from disk, it may pose performance concerns when in high use.
+The configuration file format is somewhat similar to individual style settings in a CSS stylesheet. An example is shown below. It's unlikely that a non-developer will need to access the configuration settings and not the PHP source code using tidy as well. As such, separation into an external configuration file is really only useful for the sake of separation and not cluttering source code up with settings. Additionally, because the configuration file is read from disk, it may pose performance concerns when in high use.
 
 <code>
 // single-line comment
 /* multi-line comment */
-indent: false // setting: value
+indent: false /* setting: value */
 wrap: 78
 </code>
 
@@ -77,6 +78,7 @@ class mytidy extends tidy {
         );
     }
 }
+?>
 </code>
 
 - ''array_merge'' is used to consolidate default parameter values in the ''$_default'' property into the specified ''$config'' array. Any parameters specified in the original ''$config'' array will take precedence over corresponding parameters specified in ''$_default''.
@@ -113,6 +115,7 @@ $issues = tidy_get_error_buffer($tidy);
 
 // Object-oriented
 $issues = $tidy->errorBuffer;
+?>
 </code>
 
 Note that ''errorBuffer'' is a property of the ''$tidy'' object, not a method. Also note the slight difference in naming conventions between the procedural function and the object property, versus the consistency held throughout most other areas of the APIs.
@@ -150,6 +153,7 @@ Array
          )
 )
 */
+?>
 </code>
 
 The tidy extension also provides a way to get at the number of warnings and errors that are encountered without requiring that you manually parse the error buffer. Unfortunately and rather oddly, this is only supported in the procedural API. However, adding it to the object-oriented API by subclassing the ''tidy'' class is fairly simple. Examples of both are shown below.
@@ -169,6 +173,7 @@ class mytidy extends tidy {
         return tidy_error_count($this);
     }
 }
+?>
 </code>
 
 =1=Output=1=
@@ -182,6 +187,7 @@ $output = tidy_get_output($tidy);
 
 // Object-oriented
 $output = (string) $tidy;
+?>
 </code>
 
 While the object-oriented API offers no public declaration of the magic method ''__toString'', it can be cast to a string as well as output directly using the ''echo'' construct.
