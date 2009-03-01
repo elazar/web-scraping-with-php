@@ -181,9 +181,9 @@ cURL supports both Basic and Digest HTTP authentication methods, among others. T
 
 ''CURLOPT_FOLLOWLOCATION'' can be set to ''true'' to have cURL automatically place process redirections. That is, it will detect Location headers in the server response and implicitly issue requests until the server response no longer contains a Location header. To set the maximum number of Location headers to have cURL process automatically before terminating, use the ''CURLOPT_MAXREDIRS'' setting. To have authentication credentials persist in requests resulting from redirections, set the ''CURLOPT_UNRESTRICTED_AUTH'' setting to true.
 
-=2=Referrers=2=
+=2=Referers=2=
  
-''CURLOPT_REFERER'' allows you to explicitly set the value of the Referrer header. Setting ''CURLOPT_AUTOREFERER'' to ''true'' will cause cURL to automatically set the value of the Referrer header whenever it processes a Location header.
+''CURLOPT_REFERER'' allows you to explicitly set the value of the Referer header. Setting ''CURLOPT_AUTOREFERER'' to ''true'' will cause cURL to automatically set the value of the Referer header whenever it processes a Location header.
 
 =2=Content Caching=2=
 
@@ -213,7 +213,7 @@ cURL DNS caching is enabled by default. Some situations like debugging may warra
 
 Also noteworthy is the fact that cURL DNS caching is not thread-safe. Threading is a particular style of parallel processing. The most common implementation of threading consists of multiple threads of execution contained within a single operating system process that share resources such as memory. Because of this, it may operate unpredictably in a threaded environment such as Windows Server or *NIX running a threaded Apache MPM. 
 
-If you are using the HTTP streams wrapper or either of the PHP-based HTTP client libraries covered in this chapter and you have access to install software on your server, you may want to install a local DNS caching daemon to improve performance. Try nscd or dnsmasq on *NIX. Writing DNS caching into your own client will be covered later in this section.
+If you are using the HTTP streams wrapper or either of the PHP-based HTTP client libraries covered in this chapter and you have access to install software on your server, you may want to install a local DNS caching daemon to improve performance. Try nscd or dnsmasq on *NIX. Writing DNS caching into your own client will be covered in a later chapter on writing your own HTTP client.
 
 =2=Timeouts=2=
 

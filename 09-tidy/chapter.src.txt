@@ -1,4 +1,4 @@
-=t=Tidying Up=t=
+=t=Tidy Extension=t=
 
 At this point, you should have completed the retrieval phase of the web scraping process and have your raw response body ready and awaiting analysis. Congratulations on making it to the halfway mark.
 
@@ -14,7 +14,7 @@ The World Wide Web Consortium (W3C) provides a markup validation service in orde
 
 There are two ways to proceed in cleaning up markup marlformations. One is manual, involves the use of basic string manipulation functions or regular expression functions, and can quickly become messy and rather unmanageable. The other is more automated and involves using the tidy extension to locate and correct markup issues. While the process is configurable, it obviously lacks the fine-grained control that comes with handling it manually.
 
-The majority of this chapter will focus on using tidy to correct markup issues. For those that tidy cannot handle to your satisfaction, the approach mentioned earlier involving string and regular expression functions is your alternative. Regular expressions will be covered in more detail in a later chapter.
+The majority of this chapter will focus on using tidy to correct markup issues. For those issues that tidy cannot handle to your satisfaction, the approach mentioned earlier involving string and regular expression functions is your alternative. Regular expressions will be covered in more detail in a later chapter.
 
 The tidy extension offers two API styles: procedural and object-oriented. Both offer mostly equivalent functionality (relevant differences will be covered later) and which to use is really a matter of preference. Though both API styles use objects of the ''tidy'' class, it is recommended that only one style be used as much as is feasible for the sake of consistency in syntax. Code examples in this chapter will use both styles. 
 

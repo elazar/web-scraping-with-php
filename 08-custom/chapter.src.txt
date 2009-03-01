@@ -77,20 +77,22 @@ Before parsing the body, the headers should be checked for a few things. If a ''
 
 When each chunk is sent, it is preceded by a hexadecimal number to indicate the size of the chunk followed by a CRLF sequence. The end of each chunk is also denoted by a CRLF sequence. The end of the body is denoted with a chunk size of 0, which is particularly important when using a persistent connection since the client must know where one response ends and the next begins.
 
-The ''strstr'' function can be used to obtain characters in a string prior to a newline. To convert strings containing hexadecimal numbers to their decimal equivalnets, see the ''hexdec'' function. An example of what these two might look like in action is included below. The example assumpes that a request has been written to a stream 
+The ''strstr'' function can be used to obtain characters in a string prior to a newline. To convert strings containing hexadecimal numbers to their decimal equivalents, see the ''hexdec'' function. An example of what these two might look like in action is included below. The example assumpes that a request body has been written to a string. 
 
 <code php>
 <?php
 $unchunked = '';
 do {
-    $length = hexdec(strstr($body, "\r\n", true));
-    $body = ltrim(strstr($body, "\r\n"));
-    $unchunked = substr($body, 0, $length);
+    if ($length = hexdec(strstr($body, "\r\n", true))) {
+        $body = ltrim(strstr($body, "\r\n"));
+        $unchunked .= substr($body, 0, $length);
+        $body = substr($body, $length + 2);
+    }
 } while ($length > 0);
 ?>
 </code>
 
-See Section 4.6.1 and Appendix 19.4.6 of the PHP manual for more information on chunked transfer encoding.
+See Section 3.6.1 and Appendix 19.4.6 of RFC 2616 for more information on chunked transfer encoding.
 
 =1=Content Encoding=1=
 

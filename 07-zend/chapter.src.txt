@@ -4,7 +4,7 @@ Zend Framework (often abbreviated ZF) was conceived in early 2005. Contrary to P
 
 Designed to take full advantage of the new object system introduced in PHP 5, ZF has a fully object-oriented API. The project team strives to maintain an E_STRICT level of compliance and good code coverage via unit testing.
 
-Among the components included in ZF is ''Zend_Http_Client'', an HTTP client library with a fairly comparable feature set to the others already covered in this chapter. With that, let's move into how it works.
+Among the components included in ZF is ''Zend_Http_Client'', an HTTP client library with a fairly comparable feature set to the others already covered in previous chapters. With that, let's move into how it works.
 
 =2=Beginning Again=2=
 

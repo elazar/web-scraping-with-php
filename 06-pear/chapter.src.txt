@@ -121,7 +121,7 @@ The maximum number of redirects to process can be set using the ''setMaxRedirect
 
 To retrieve information for the last response received, use the ''currentResponse'' method of the client instance. It will return an associative array containing the keys '''code''', '''headers''', and '''body''' with values corresponding to the return values of request methods ''getResponseCode'', ''getResponseHeader'', and ''getResponseBody'' respectively.
 
-By default, all responses are stored and can be accessed individually as shown below. To disable storage of responses all except the last one, call ''enableHistory'' on the client instance and pass it ''false''.
+By default, all responses are stored and can be accessed individually as shown below. To disable storage of all responses except the last one, call ''enableHistory'' on the client instance and pass it ''false''.
 
 <code php>
 <?php
