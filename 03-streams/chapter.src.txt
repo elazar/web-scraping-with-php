@@ -1,4 +1,4 @@
-=1=HTTP Streams Wrapper=1=
+=t=HTTP Streams Wrapper=t=
 
 At this point, you should be fairly well-acquainted with some of the general concepts involved in using an HTTP client. The next few chapters will review some of the more popular mainstream client libraries, particularly common use cases and the advantages and disadvantages of each. This client covered in this chapter will be the HTTP streams wrapper.
 
@@ -10,7 +10,7 @@ The fact that the wrapper is written in C is a bit of a double-edged sword. On t
 
 The streams wrapper is part of the PHP core and as such has no installation requirements beyond that of PHP itself.
 
-=2=A Simple Request and Response Handling=2=
+=1=A Simple Request and Response Handling=1=
 
 Here's a simple example of the HTTP streams wrapper in action.
 
@@ -44,7 +44,7 @@ Let's stepping through this.
 - The ''stream_get_meta_data'' function is called to read metadata for the stream pointed to by the ''$handle'' resource into ''$meta''.
 - The '''wrapper_data''' index of the ''$meta'' array outputs the same array as ''$http_response_header'' would within the current scope. So long as ''$handle'' is accessible within the current scope, stream_get_meta_data() can be called on it. This makes it more flexible than '$http_response_header''.
 
-=2=Stream Contexts and POST Requests=2=
+=1=Stream Contexts and POST Requests=1=
 
 Another concept introduced by streams is the context, which is basically a set of configuration options used in a streams operation. A context is created by passing an associative array of context options and their corresponding values to the ''stream_context_create'' function. One use of contexts with regard to the HTTP streams wrapper is making POST requests, as the wrapper uses the GET method by default.
 
@@ -81,7 +81,7 @@ Here is a walk-through of this example.
 - ''file_get_contents'' is called to execute the request, the options for which are passed via the created context ''$context''.
 - The body of the response is returned and stored in the variable ''$response''.
 
-=2=To Err and Not To Err=2=
+=1=To Err and Not To Err=1=
 
 Before PHP 5.3.0, an HTTP streams wrapper operation resulting in an HTTP error response (i.e. a 4xx or 5xx status code) causes a PHP-level warning to be emitted. This warning will only contain the HTTP version, the status code, and the status code description. The function calls for such operations generally return ''false'' as a result and leave you without a stream resource to check for more information. Here's an example of how to get what data you can.
 
@@ -145,7 +145,7 @@ switch (substr($status, 0, 1)) {
 }
 </code>
 
-=2=Few More Options, Then Do-It-Yourself=2=
+=1=Few More Options, Then Do-It-Yourself=1=
 
 Below are a few other stream context options for the HTTP streams wrapper that may prove useful.
 

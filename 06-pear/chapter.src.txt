@@ -1,4 +1,4 @@
-=1=PEAR::HTTP_Client=1=
+=t=PEAR::HTTP_Client=t=
 
 The PHP Extension and Application Repository (PEAR) project houses a library of reusable components written in PHP and a package system for distributing them, one of which is the ''HTTP_Client'' package that will be covered in the section to follow. PEAR spurred the creation of the PECL project, a repository of C extensions from which the pecl_http extension discussed in the previous section originates.
 
@@ -10,7 +10,7 @@ PHP source tarballs includes a configure option to include PEAR when compiling. 
 
 At the time of writing, efforts are being put into PEAR 2, the successor to the current incarnation of the PEAR project. This will include a newer package distribution system and ports or revamps of many existing packages to bring them up-to-date with features available in PHP 5. However, because there is currently little in the way of stable ported code for PEAR 2, coverage in this book will be limited to PEAR 1. }}
 
-=2=Requests and Responses=2=
+=1=Requests and Responses=1=
 
 There are two ways to perform HTTP requests with the related PEAR components: ''HTTP_Request'' and ''HTTP_Client''. The latter composes the former to add capabilities such as handling redirects and persisting headers, cookie data, and request parameters across multiple requests. Here's how to perform a simple request and extract response information when using ''HTTP_Request'' directly. 
 
@@ -62,7 +62,7 @@ $request->HTTP_Request();
 ?>
 </code>
 
-=2=Juggling Data=2=
+=1=Juggling Data=1=
 
 ''HTTP_Request'' makes data management pretty easy and straightforward, so it's all covered in this section.
 
@@ -94,7 +94,7 @@ $request->addFile('fieldname', '/path/to/file', 'text/plain');
 - ''addFile'' is intended to simulate uploading a file via a file input field in an HTML form. For forms with multiple file upload files with the same name, pass an array of file paths as the second parameter and (optionally) an array of corresponding file MIME types as the third parameter. 
 - To send the contents of a file as the entire body of a request, use ''file_get_contents'' to retrieve the file contents into a string and pass that to the ''setBody'' method of the request instance.
 
-=2=Wrangling Headers=2=
+=1=Wrangling Headers=1=
 
 Handling headers is also relatively straightforward. The only header-specific convenience method that's included is for handling Basic HTTP authentication, as shown below.
 
@@ -107,7 +107,7 @@ $request->setBasicAuth('username', 'password');
 ?>
 </code>
 
-=2=Using the Client=2=
+=1=Using the Client=1=
 
 ''HTTP_Client'' persists explicit sets of headers and requests parameters across multiple requests, which are set using the ''setDefaultHeader'' and ''setRequestParameter'' methods respectively. The client constructor also accepts arrays of these. Default headers and request parameters can be cleared by calling ''reset'' on the client instance.
 
@@ -132,7 +132,7 @@ for ($client->rewind(); $client->valid(); $client->next()) {
 ?>
 </code>
 
-=2=Observing Requests=2=
+=1=Observing Requests=1=
 
 Both ''HTTP_Request'' and ''HTTP_Client'' have ''attach'' and ''detach'' methods for adding and removing instances of ''HTTP_Request_Listener''. This class implements the observer design pattern and serves to intercept events that occur during the process of transmitting a request and receiving a response. To create an observer, first create a class that extends ''HTTP_Request_Listener'' as shown below.
 
