@@ -1,4 +1,4 @@
-=t=Retrieval=t=
+=t=HTTP=t=
 
 The first task that a web scraping application must be capable of performing is the retrieval of documents containing the information to be extracted. If you have used a web browser without becoming aware of all that it does "under the hood" to render a page for your viewing pleasure, this may sound trivial to you. However, the complexity of a web scraping application is generally proportional to the complexity of the application it targets for retrieving and extracting data.
 
