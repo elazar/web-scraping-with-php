@@ -4,7 +4,7 @@ The pecl_http extension became available in PHP 5 and gained a class for HTTP re
 
 Another major difference is that the cURL extension is considered to be part of the PHP core, which means that it is more likely to be present in most environments supporting PHP. In contrast, pecl_http must be installed via the pecl installer or compiled manually from source. In either case, the extension requires the PHP and libcurl development headers to be present in order to compile properly. Not technically being part of the PHP core, it is less likely to be present or available in shared hosting environments depending on the hosting provider. This may be a concern for code that is intended to be distributed for use in a variety of environments.
 
-To install pecl_http via the pecl installer, PEAR must be installed. See http://pear.php.net/manual/en/installation.php. A package for PEAR may also be available through your OS package manager. Once it is installed, simply issue the command ''pecl install pecl_http''. To install from source, download the latest version from http://pecl.php.net/get/pecl_http. Note that this requires the header files for the PHP version you are using, which are contained in the PHP source tarballs available for download at http://www.php.net/downloads.php or possibly also through your OS package manager.
+To install pecl_http via the pecl installer, PEAR must be installed (see http://pear.php.net/manual/en/installation.php). A package for PEAR may also be available through your OS package manager. Once it is installed, simply issue the command ''pecl install pecl_http''. To install from source, download the latest version from http://pecl.php.net/get/pecl_http. Note that this requires the header files for the PHP version you are using, which are contained in the PHP source tarballs available for download at http://www.php.net/downloads.php or possibly also through your OS package manager.
 
 =1=Back to Basics=1=
 
@@ -156,6 +156,12 @@ The ''timeout'' request option, which corresponds to ''CURLOPT_TIMEOUT'', is the
 Likewise the ''connecttimeout'' request option, the counterpart for ''CURLOPT_CONNECTTIMEOUT'', is the maximum number of seconds that a connection attempt, which includes DNS resolution, may take.
 
 Finally the ''dns_cache_timeout'' request option, which is equivalent to ''CURLOPT_DNS_CACHE_TIMEOUT'', is the maximum number of seconds that a DNS cache entry will be retained and defaults to 120 seconds (two minutes).
+
+=1=Content Encoding=1=
+
+If you are unfamiliar with content encoding, see "Content Encoding" in Chapter 8 for more information. To enable it when using pecl_http, the ''compress'' request option must be set to ''true''.
+
+Note that this requires libz support to be enabled. You can check for this by executing the ''phpinfo'' function within a PHP script or running ''php -ri http'' from command line. If libz support is not enabled, the technique detailed in Chapter 8 for handling encoded content can be used on the return value of the request object's ''getResponseBody'' method. 
 
 =1=Cookies=1=
 

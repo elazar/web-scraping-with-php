@@ -4,7 +4,7 @@ The cURL PHP extension, available since PHP 4.0.2, wraps a library called libcur
 
 cURL assumes fewer default configuration values than the HTTP streams wrapper, like whether or not to process redirections and how many of them to process. The disadvantage to this is that, combined with the rich feature set of the extension, PHP code to use cURL is often more verbose than equivalent code using other client libraries.
 
-Like the streams wrapper, the cURL extension is written in C and has the same pros and cons in that respect. cURL uses a session handle (of the PHP resource data type) with which configuration settings can be associated in a similar fashion to how they are associated with contexts for stream wrappers. Also like stream contexts, cURL session handles can be used multiple times to repeat the same operation until passed to the ''curl_close'' function.
+Like the streams wrapper, the cURL extension is written in C and has the same pros and cons in that respect. cURL uses a **session handle** (of the PHP resource data type) with which configuration settings can be associated in a similar fashion to how they are associated with contexts for stream wrappers. Also like stream contexts, cURL session handles can be used multiple times to repeat the same operation until passed to the ''curl_close'' function.
 
 The cURL extension is included in the PHP core, but must either be compiled into PHP or installed as a separate extension. Depending on the runtime environment's operating system, this may involve installing a package in addition to the OS PHP package.
 
@@ -61,7 +61,7 @@ Here are a few other cURL configuration setting constants related to the request
 
 - ''CURLOPT_HTTPGET'': Boolean that, when set to ''true'', explicitly resets the request method to GET if it's been changed from the default.
 - ''CURLOPT_NOBODY'': Boolean that, when set to ''true'', excludes the body from the response by changing the request method to GET.
-- ''CURLOPT_PUT'': Boolean that, when set to ''true'', sets the request method to PUT for file uploads.
+- ''CURLOPT_PUT'': Boolean that, when set to ''true'', sets the request method to PUT.
 - ''CURLOPT_CUSTOMREQUEST'': String used to set the request method to one without its own corresponding CURLOPT constant, such as DELETE.
 
 =1=Setting Multiple Options=1=
@@ -211,7 +211,7 @@ Because the results of DNS lookups don't change often, DNS caching is often used
 
 cURL DNS caching is enabled by default. Some situations like debugging may warrant disabling it, which can be done by setting ''CURLOPT_DNS_USE_GLOBAL_CACHE'' to ''false''. cURL will also by default retain the results of DNS lookups in memory for two minutes. To change this, set the ''CURLOPT_DNS_CACHE_TIMEOUT'' setting to the number of seconds a result should remain in the cache before expiring.
 
-Also noteworthy is the fact that cURL DNS caching is not thread-safe. Threading is a particular style of parallel processing. The most common implementation of threading consists of multiple threads of execution contained within a single operating system process that share resources such as memory. Because of this, it may operate unpredictably in a threaded environment such as Windows Server or *NIX running a threaded Apache MPM. 
+Also noteworthy is the fact that cURL DNS caching is not thread-safe. Threading is a particular style of parallel processing. The most common implementation of threading consists of multiple threads of execution contained within a single operating system process that share resources such as memory. Because of this, it may operate unpredictably in a threaded environment such as Windows Server or *NIX running a threaded Apache MPM.
 
 If you are using the HTTP streams wrapper or either of the PHP-based HTTP client libraries covered in this chapter and you have access to install software on your server, you may want to install a local DNS caching daemon to improve performance. Try nscd or dnsmasq on *NIX. Writing DNS caching into your own client will be covered in a later chapter on writing your own HTTP client.
 

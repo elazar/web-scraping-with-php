@@ -2,7 +2,7 @@
 
 At this point, you should be fairly well-acquainted with some of the general concepts involved in using an HTTP client. The next few chapters will review some of the more popular mainstream client libraries, particularly common use cases and the advantages and disadvantages of each. This client covered in this chapter will be the HTTP streams wrapper.
 
-PHP 4.3 saw the addition of the Streams extension to the core. According to the related section of the PHP manual, the intention was to provide "a way of generalizing file, network, data compression, and other operations which share a common set of functions and uses." Streams introduced several concepts, one of which is a wrapper. The job of a wrapper is to define how a stream handles communications in a specific protocol or using a specific encoding. One such protocol for which a wrapper is available is HTTP.
+PHP 4.3 saw the addition of the Streams extension to the core. According to the related section of the PHP manual, the intention was to provide "a way of generalizing file, network, data compression, and other operations which share a common set of functions and uses." Streams introduced several concepts, one of which is a **wrapper**. The job of a wrapper is to define how a stream handles communications in a specific protocol or using a specific encoding. One such protocol for which a wrapper is available is HTTP.
 
 The advantage to the HTTP streams wrapper is that there is very little to learn in terms of the API. It's fairly easy to get something simple working quickly. The disadvantage is that it's very minimalistic in terms of the feature set offered. It gives you the ability to send HTTP requests without having to construct them entirely on your own (by specifying the body and optionally any headers you want to add) and access data in the response. That's about it. The ability to debug requests is one example of a feature that it does not include at the time of writing.
 
@@ -46,7 +46,7 @@ Let's stepping through this.
 
 =1=Stream Contexts and POST Requests=1=
 
-Another concept introduced by streams is the context, which is basically a set of configuration options used in a streams operation. A context is created by passing an associative array of context options and their corresponding values to the ''stream_context_create'' function. One use of contexts with regard to the HTTP streams wrapper is making POST requests, as the wrapper uses the GET method by default.
+Another concept introduced by streams is the **context**, which is basically a set of configuration options used in a streams operation. A context is created by passing an associative array of context options and their corresponding values to the ''stream_context_create'' function. One use of contexts with regard to the HTTP streams wrapper is making POST requests, as the wrapper uses the GET method by default.
 
 <code php>
 <?php

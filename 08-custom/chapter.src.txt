@@ -2,11 +2,13 @@
 
 First, it should go without saying that it's generally better to use and build upon an existing library rather than trying to roll your own from scratch. For one thing, you can get a number of features "for free" that way with no work required on your part. For another, developers outside of your team and projects work on those libraries, and in the words of Eric S. Raymond, "Given enough eyes, all bugs are shallow."
 
-Be that as it may, you're likely to pursue doing this if you've read this far, so let's proceed.
+However, it certainly doesn't hurt to be familiar with this information even if you don't plan to build your own client. Doing so gives you more capability to troubleshoot issues with existing libraries and contribute patches back to their project teams.
+
+Whatever your motivation, here we go.
 
 =1=Sending Requests=1=
 
-In addition to wrappers for specific protocols, the streams extension also offers socket transports for dealing with data at a lower level. One of these socket transports is for TCP, or Transmission Control Protocol, which is a core internet protocol used to ensure realiable delivery of an ordered sequence of bytes. The socket transport facilitates sending a raw data stream, in this case a manually constructed HTTP request, to a server.
+In addition to wrappers for specific protocols, the streams extension also offers socket transports for dealing with data at a lower level. One of these socket transports is for TCP, or Transmission Control Protocol, which is a core internet protocol used to ensure reliable delivery of an ordered sequence of bytes. The socket transport facilitates sending a raw data stream, in this case a manually constructed HTTP request, to a server.
 
 <code php>
 <?php
@@ -96,7 +98,7 @@ See Section 3.6.1 and Appendix 19.4.6 of RFC 2616 for more information on chunke
 
 =1=Content Encoding=1=
 
-If the zlib extension is loaded (which can be checked using the ''extension_loaded'' function), the client can optionally include an ''Accept-Encoding'' header with a value of ''gzip,deflate'' in its request. If the server supports content compression, it will include a ''Content-Encoding'' header in its response with a value indicating which of the two compression schemes it used on the response body before sending it.
+If the zlib extension is loaded (which can be checked using the ''extension_loaded'' function or executing ''php -m'' from command line), the client can optionally include an ''Accept-Encoding'' header with a value of ''gzip,deflate'' in its request. If the server supports content compression, it will include a ''Content-Encoding'' header in its response with a value indicating which of the two compression schemes it used on the response body before sending it.
 
 The purpose of this is to reduce the amount of data being sent to reduce bandwidth consumption and increase throughput (assuming that compression and decompression takes less time than data transfer, which is generally the case). Upon receiving the response, the client must decompress the response using the original scheme used by the server to compress it.
 
@@ -119,7 +121,7 @@ See RFC 2616 Section 3.5 for more information on content encoding. RFC 1951 cove
 
 Each time a web server receives a request, a separate line of execution in the form of a process or thread is created or reused to deal with that request. Left unchecked, this could potentially cause all resources on a server to be consumed by a large request load. As such, web servers generally restrict the number of requests they can handle concurrently. A request beyond this limit would be blocked until the server completed an existing request for which it had already allocated resources. Requests left unserved too long eventually time out.
 
-Throttling is a term used to describe a client overloading a server with requests to the point where it consumes the available resource pool and thereby delays or prevents the processing of requests, potentially including requests the client itself sent last. Obviously, it's desirable to avoid this behavior for two reasons: 1) it can be construed as abuse and result in being banned from accessing the server; 2) it prevents the client from being consistently functional.
+Throttling is a term used to describe a client overloading a server with requests to the point where it consumes the available resource pool and thereby delays or prevents the processing of requests, potentially including requests the client itself sent last. Obviously, it's desirable to avoid this behavior for two reasons: 1) it can be construed as abuse and result in your IP being banned from accessing the server; 2) it prevents the client from being consistently functional.
 
 Most web browsers will establish a maximum of four concurrent connections per domain name when loading a given resource and its dependencies. As such, this is a good starting point for testing the load of the server hosting the target application. When possible, measure the response times of individual requests and compare that to the number of concurrent requests being sent to determine how much of a load the server can withstand.
 
