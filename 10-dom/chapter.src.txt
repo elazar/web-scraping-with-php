@@ -1,0 +1,286 @@
+=t=DOM Extension=t=
+
+Once the retrieved markup document has been cleaned up so that it validates, the next step is extracting useful data from it. For this, the ideal approach is to take advantage of the fact that the document is valid markup and apply an XML extension to it. PHP has several of these and each of the next few chapters will each be devoted to covering them.
+
+The namesake of this chapter is the Document Object Model (DOM) extension. This extension gets its name from a standardized language-independent API for navigating and manipulating valid and well-formed XML and HTML documents. The standard is maintained and recommended by the World Wide Web Consortium (W3C), an organization devoted to emerging internet-related standards. The chapter won't cover the DOM extension in its entirety, only parts that are relevant and essential to web scraping.
+
+{{DOM XML
+
+The DOM extension is only available in PHP 5. Its PHP 4-compatible predecessor, the DOM XML extension, has a somewhat different API but shares many of the same concepts. Examples in this chapter will be restricted to the DOM extension. The related section of the PHP manual can be consulted for equivalent specifics in the DOM XML extension at http://php.net/manual/en/book.domxml.php.}}
+
+=1=Types of Parsers=1=
+
+Before going much further, you should be aware that there are two types of XML parsers: **tree parsers** and **pull parsers**. Tree parsers load the entire document into memory and allow you to access any part of it at any time as well as manipulate it. Pull parsers read the document a piece at a time and allow you to work with individual pieces as they're read.
+
+The two types of parsers share a relationship similar to that between the ''file_get_contents'' and ''fgets'' functions: the former lets you work with the entire document at once and uses as much memory to store it, while the latter allows you to work with a piece of the document at a time and use less memory in the process.
+
+When working with fairly large documents, lower memory usage is generally the preferable option. Attempting to load a huge document into memory all at once has the same effect on the local system as a throttling client does on a web server: in both cases, resources are consumed and system performance is debilitated until the system eventually locks up or crashes under the stress.
+
+The DOM extension is a tree parser. In general, web scraping does not require the ability to access all parts of the document simultaneously. However, the type of data extraction involved in web scraping can be rather extensive to implement using a pull parser. Which extension to use depends on the size and complexity of the document.
+
+=1=Loading Documents=1=
+
+The ''DOMDocument'' class is where use of the DOM extension begins. The first thing to do is instantiate it and then feed it the validated markup data. Note that the DOM extension will emit warnings when a document is loaded if that document is not valid or well-formed. To avoid this, see the previous chapter on using the tidy extension. If tidy does not eliminate the issue, errors can be controlled as shown in the example below.
+
+<code php>
+<?php
+// Buffer DOM errors rather than emitting them as warnings
+$oldSetting = libxml_use_internal_errors(true);
+
+// Instantiate a container for the document
+$doc = new DOMDocument;
+
+// Load markup already contained within a string
+$doc->loadHTML($htmlString);
+
+// Load markup saved to an external file
+$doc->loadHTMLFile($htmlFilePath);
+
+// Get all errors if needed
+$errors = libxml_get_errors();
+
+// Get only the last error
+$error = libxml_get_last_error();
+
+// Clear any existing errors from previous operations
+libxml_clear_errors();
+
+// Revert error buffering to its previous setting
+libxml_use_internal_errors($oldSetting);
+?>
+</code>
+
+=1=Trees=1=
+
+Once a document is loaded, the next natural step is to extract desired data from it. However, doing so requires a bit more knowledge about how the DOM is structured. Recall the earlier mention of tree parsers. If you have any computer science background, you will be glad to know that the term "tree" in the context of tree parsers does in fact refer to the data structure by the same name. If not, here is a brief run-down of related concepts.
+
+A **tree** is a hierarchical structure (think family tree) composed of **nodes**, which exist in the DOM extension as the ''DOMNode'' class. Nodes are to trees what elements are to arrays: just items that exist within the data structure.
+
+Each individual node can have zero or more **child nodes** that are collectively represented by a ''childNodes'' property in the ''DOMNode'' class. ''childNodes'' is an instance of the class ''DOMNodeList'', which is exactly what it sounds like. Other related properties include ''firstChild'' and ''lastChild''. **Leaf nodes** are nodes that have no children, which can be checked using the ''hasChildNodes'' method of ''DOMNode''.
+
+All nodes in a tree have a single **parent node**, with one exception: the **root node** from which all other nodes in the tree stem. If two nodes share the same parent, they are appropriately referred to as **sibling nodes**. This relationship is shown in the ''previousSibling'' and ''nextSibling'' properties in ''DOMNode''.
+
+Lastly, child nodes of a node, child nodes of those child nodes, and so on are collectively known as **descendant nodes**. Likewise, the parent node of a node, that parent node's parent node, and so on are collectively known as **ancestor nodes**.
+
+An example may help to showcase this terminology.
+
+<code html>
+<html>
+<body>
+<ul id="thelist">
+  <li>Foo</li>
+  <li>Bar</li>
+</ul>
+</body>
+</html>
+</code>
+
+- ''html'' is the root node.
+- ''body'' is the first (and only) child of ''html''.
+- ''ul'' is the first (and only) child of ''body''.
+- The ''li'' nodes containing ''Foo'' and ''Bar'' are the first and last child nodes of ''ul'' respectively.
+- The ''li'' node containing ''Bar'' node is the next sibling of the ''li'' node containing ''Foo''.
+- The ''li'' node containing ''Foo'' is likewise the previous sibling of the ''li'' node containing ''Bar''.
+- The ''ul'' and ''li'' nodes are descendants of the ''body'' node.
+
+=1=Elements and Attributes=1=
+
+At this point, the DOM transcends the tree analogy. There are multiple types of nodes, or to phrase that within the context of the DOM extension, ''DOMNode'' has multiple subclasses. The main two you'll be dealing with are ''DOMElement'' for **elements** and ''DOMAttr'' for **attributes**. Here are how these concepts apply to the example in the last section.
+
+- ''ul'' is the name of an element.
+- ''id'' is the name of an attribute of the ''ul'' element.
+- ''thelist'' is the value of the ''id'' attribute.
+- ''Foo'' and ''Bar'' are the values of the ''li'' elements.
+
+=1=Homing In on the Target=1=
+
+Two methods of the ''DOMDocument'' class allow you to reduce the number of nodes you have to traverse to find the data you want fairly quickly.
+
+''getElementById'' attempts to locate a single element that meets two criteria: 1) it is a descendant of the document's root element; 2) it has a given ''id'' attribute value. If such an element is found, it is returned as a ''DOMElement'' instance; if not, ''null'' is returned.
+
+''getElementsByTagName'' attempts to locate all elements that meet two criteria: 1) it is a descendant of the document's root element; 2) it has a given element name (such as ''ul''). This method always returns a ''DOMNodeList'' of any found elements. The ''DOMNodeList'' class has a ''length'' property that will be equal to 0 if no elements are found. It is also iterable, so it can be used as the subject of a ''foreach'' loop.
+
+The ''DOMElement'' class also has a ''getElementsByTagName'' method, which functions the same way with the exception that located elements will be descendants of that element instead of the document's root element.
+
+<code php>
+<?php
+// One way get the list items in the last example
+$listItems = $doc->getElementsByTagName('li');
+
+// A slightly more specific way (better if there are multiple lists)
+if ($list = $doc->getElementById('thelist')) {
+    $listItems = $list->getElementsByTagName('li');
+}
+
+// Yet another way if the list doesn't have an id
+$lists = $doc->getElementsByTagName('ul');
+if ($lists->length) {
+    $list = $lists->item(0);
+    $listItems = $list->getElementsByTagName('li');
+}
+
+// Outputs "thelist" (without quotes)
+echo $list->getAttribute('id');
+
+// Outputs "Foo" on one line, then "Bar" on another
+foreach ($listItems as $listItem) {
+    echo $listItem->nodeValue, PHP_EOL;
+}
+
+// Outputs markup inside <ul id="thelist"> and </ul>
+echo $list->nodeValue;
+?>
+</code>
+
+=1=XPath and DOMXPath=1=
+
+Somewhat similar to the way that regular expressions allow instances of character patterns to be found within strings, XPath allows instances of node patterns to be found within XML-compatible documents. Both technologies accomplish their purpose by providing a syntax comprised of **metacharacters** to express these patterns in a concise and succinct way. With the DOM extension, support for version 1.0 of the XPath standard is implemented as the ''DOMXPath'' class.
+
+The ''DOMXPath'' constructor has a single required parameter: an existing ''DOMDocument'' instance on which queries will be performed. ''DOMXPath'' has two other relevant methods: ''evaluate'' and ''query''. Both accept a string containing an XPath expression with which to query the document as their first parameter.
+
+Optionally, a ''DOMNode'' instance associated with the document may be passed in as the second parameter (''$contextNode'') for either method. When specified, that node will become the **context node** and query results will be restricted to that node and its descendants. Otherwise, the root element of the document is assumed to be the context node.
+
+The difference between ''evaluate'' and ''query'' is that the latter will always return an instance of ''DOMNodeList'' whereas the former will attempt to return an appropriately typed result in the case of only a single result being found.
+
+=1=Absolute Addressing=1=
+
+What follows is a brief introduction to the syntax of XPath expressions; it should not be considered a comprehensive reference. Concepts are explained mostly by example and in some cases are simplified to reduce the initial learning curve. For a more complete overview, see the resources listed at the end of this chapter.
+
+The process of using an XPath expression to obtain a set of nodes to which that expression applies is referred to as **addressing**. The remainder of the chapter will cover various aspects of addressing and related expression syntax.
+
+XPath expressions share several similarities with UNIX filesystem paths, both of which are used to traverse conceptual tree structures. See the example below for specific instances of this. The previous HTML example used to illustrate various concepts of markup languages is reused here to showcase XPath addressing.
+
+<code php>
+<?php
+// Load a markup document
+$doc = new DOMDocument;
+$doc->loadHTML('
+    <html>
+    <body>
+    <ul id="thelist">
+      <li>Foo</li>
+      <li>Bar</li>
+    </ul>
+    </body>
+    </html>
+');
+
+// Configure an object to query the document
+$xpath = new DOMXPath($doc);
+
+// Returns a DOMNodeList with only the html node
+$list = $xpath->query('/html');
+
+// Returns a DOMNodeList with only the body node
+$list = $xpath->query('/html/body');
+
+// Also returns a DOMNodeList with only the body node
+$list = $xpath->query('//body');
+?>
+</code>
+
+- In the first two examples, note that the root element (''html'') is referenced in the expression even though it is assumed to be the context node (since no other node is specified as the second parameter in either ''query'' call).
+- A **single forward slash** ''/'' indicates a parent-child relationship. ''/html/body'' addresses all ''body'' nodes that are children the document's root ''html'' element (which in this case only amounts to a single result).
+- A **double forward slash** ''//'' indicates an ancestor-descendant relationship. ''//body'' addresses all ''body'' nodes that are descendants of the context node (which again only amounts to a single result).
+
+The single and double forward slash operators can be used multiple times and in combination with each other as shown below.
+
+<code php>
+<?php
+// Returns all ul nodes that are descendants of the body node
+$list = $xpath->query('//body//ul');
+
+// Returns all li nodes that are children of the ul nodes
+$list = $xpath->query('//body//ul/li');
+?>
+</code>
+
+=1=Relative Addressing=1=
+
+The above examples use what is called **absolute addressing**, similar in concept to absolute filesystem paths. The next example covers use **relative addressing**.
+
+<code php>
+<?php
+// Returns all ul nodes that have li child nodes
+$list = $xpath->query('//body//ul/li/..');
+?>
+</code>
+
+Where ''//body//ul/li'' selects ''li'' nodes, ''//body//ul/li/..'' instead selects ''ul'' nodes by using relative addressing (specifically ''..'') to indicate that the parent node of the addressed node (''li'') should be returned rather than the addressed node itself. Compare this with the same sequence used to refer to the parent directory of the current directory on a UNIX filesystem.
+
+=1=Addressing Attributes=1=
+
+Examples thus far have dealt with element nodes in particular. XPath also supports the selection of attribute nodes.
+
+<code php>
+// Returns the id attribute nodes of all ul nodes
+$list = $xpath->query('//ul/@id');
+
+// Returns all ul nodes that have id attribute nodes
+$list = $xpath->query('//ul/@id/..');
+
+// Returns all id attribute nodes
+$list = $xpath->query('//@id');
+?>
+</code>
+
+- ''//ul/@li'' addresses all ''id'' attribute nodes associated with ''ul'' element nodes that are descendants of the context node.
+- Note how the use of relative addressing in the second example applies to attributes nodes just as it would apply to child element nodes.
+- ''//@id'' addresses all ''id'' attribute nodes that are descendants of the context node regardless of the element with which they are associated.
+
+=1=Unions=1=
+
+When addressing nodes, it is possible to perform a single query that uses multiple expressions. This is referred to as addressing the **union** of those expressions.
+
+<code php>
+<?php
+// Returns the li child nodes of all ul and ol nodes
+$list = $xpath->query('//ol/li|//ul/li');
+
+// Returns the th and td nodes of all tr nodes
+$list = $xpath->query('//tr/th|//tr/td');
+?>
+</code>
+
+- The first example returns all list items (''li'') of both unordered (''ul'') and ordered (''ol')) lists.
+- The second example returns all header (''th'') and data (''td'') cells of table rows (''tr'').
+
+=1=Conditions=1=
+
+In addition to their surrounding hierarchical structure, nodes can also be addressed based on **conditions**.
+
+<code php>
+<?php
+// Returns all ul nodes with an id attribute node
+$list = $xpath->query('//ul[@id]');
+
+// Returns all li child nodes of the ul node with an id of "thelist"
+$list = $xpath->query('//ul[@id = "thelist"]/li');
+
+// Returns the first ul node that is a descendant of the context node
+$list = $xpath->query('//ul[1]');
+
+// Returns the first li child node of each ul node
+$list = $xpath->query('//ul/li[1]');
+
+// Returns all ul nodes containing an li node with the value "foobar"
+$list = $xpath->query('//ul[li = "foobar"]');
+?>
+</code>
+
+- Square brackets are used to delimit a conditional expression.
+- Element and attribute nodes are denoted the same way within a condition as they are outside of one. That is, elements are simply referred to by element name and ''@'' is prended to attribute names.
+- The ''='' operator is used for equality comparisons. The converse, the ''!='' operator, checks for inequality. Other fairly standard comparison operators are also supported, including ''<'', ''<='', ''>'', and ''>=''.
+- A condition comprised only of a single number is actually short for ''position() = #'' where ''#'' is the number used. ''position'' is a function that returns the position of each individual node within the current context.
+
+=1=Where To Go From Here=1=
+
+Only a fraction of what XPath offers has been covered here, mainly basic concepts and areas that are most likely to be applicable when using XPath to extract data from retrieved markup documents. Other functions and operators and more advanced concepts are detailed further in the resources cited at the end of the chapter. Review of those resources is highly recommended for more extensive and complex data extraction applications.
+
+{{DOM Resources
+
+- DOM documentation in the PHP manual: http://php.net/dom
+- An excellent overview of XML and XPath: http://schlitt.info/opensource/blog/0704_xpath.html
+- More information on XML: http://en.wikibooks.org/wiki/XML:_Managing_Data_Exchange
+- DOM Level 3 Core standard: http://www.w3.org/TR/DOM-Level-3-XPath
+- DOM Level 3 XPath standard: http://www.w3.org/TR/DOM-Level-3-Core}}
