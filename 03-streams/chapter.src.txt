@@ -18,6 +18,7 @@ Here's a simple example of the HTTP streams wrapper in action.
 <?php
 $response = file_get_contents('http://localhost.example');
 print_r($http_response_header);
+?>
 </code>
 
 There are a few things to note.
@@ -35,6 +36,7 @@ $handle = fopen('http://localhost.example', 'r');
 $response = stream_get_contents($handle);
 $meta = stream_get_meta_data($handle);
 print_r($meta['wrapper_data']);
+?>
 </code>
 
 Let's stepping through this.
@@ -69,6 +71,7 @@ $response = file_get_contents(
     false,
     $context
 );
+?>
 </code>
 
 Here is a walk-through of this example.
@@ -110,6 +113,7 @@ $stream = fopen('http://localhost.example/404', 'r');
 // If error_handler() does not terminate the script, control will
 // be returned here once it completes its execution
 restore_error_handler();
+?>
 </code>
 
 This situation has been improved somewhat in PHP 5.3 with the addition of the ''ignore_errors'' context setting. When this setting is set to ''true'', operations resulting in errors are treated the same way as successful operations. Here's an example of what that might look like.
@@ -143,6 +147,17 @@ switch (substr($status, 0, 1)) {
     default:
         $result = true;
 }
+?>
+</code>
+
+=1=HTTP Authentication=1=
+
+The HTTP stream wrapper has not no context options for HTTP authentication credentials. However, it is possible to include the credentials as part of the URL being accessed. See the example below. Note that credentials are not preencoded; this is handled transparently when the request is made. Also, note that this feature only works when Basic HTTP authentication is used; Digest authentication must be handled manually. 
+
+<code php>
+<?php
+$response = file_get_contents('http://username:password@localhost.example');
+?>
 </code>
 
 =1=Few More Options, Then Do-It-Yourself=1=

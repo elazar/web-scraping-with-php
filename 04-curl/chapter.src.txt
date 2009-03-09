@@ -61,7 +61,6 @@ Here are a few other cURL configuration setting constants related to the request
 
 - ''CURLOPT_HTTPGET'': Boolean that, when set to ''true'', explicitly resets the request method to GET if it's been changed from the default.
 - ''CURLOPT_NOBODY'': Boolean that, when set to ''true'', excludes the body from the response by changing the request method to GET.
-- ''CURLOPT_PUT'': Boolean that, when set to ''true'', sets the request method to PUT.
 - ''CURLOPT_CUSTOMREQUEST'': String used to set the request method to one without its own corresponding CURLOPT constant, such as DELETE.
 
 =1=Setting Multiple Options=1=
@@ -207,7 +206,7 @@ You may notice that code using the cURL extension appears to run faster than cod
 
 DNS, or Domain Name System, is a system used to derive an IP address for a domain name in a manner similar to how phone directories are used to obtain a phone number for a person using their name. The process of obtaining an IP address for a domain name, called a DNS lookup, can be a costly operation in terms of the time required.
 
-Because the results of DNS lookups don't change often, DNS caching is often used to retain the results of lookups for a certain time period after they are performed. This can be done at multiple levels including the source code level as with cURL, the OS level either natively or via software like nscd or dnsmasq, or at the Internet Service Provider (ISP) level.
+Because the results of DNS lookups don't change often, DNS caching is often used to retain the results of lookups for a certain time period after they are performed. This can be done at multiple levels including the source code level as with cURL, natively at the OS level, or via software like nscd or dnsmasq run either locally or on remote servers such as those used by internet service providers.
 
 cURL DNS caching is enabled by default. Some situations like debugging may warrant disabling it, which can be done by setting ''CURLOPT_DNS_USE_GLOBAL_CACHE'' to ''false''. cURL will also by default retain the results of DNS lookups in memory for two minutes. To change this, set the ''CURLOPT_DNS_CACHE_TIMEOUT'' setting to the number of seconds a result should remain in the cache before expiring.
 
@@ -223,7 +222,7 @@ If you are using the HTTP streams wrapper or either of the PHP-based HTTP client
 
 =1=Request Pooling=1=
 
-Because it is written C, the cURL extension has one feature that cannot be replicated in libraries written in PHP: the ability to run multiple requests in parallel. What this means is that multiple requests can be provided to cURL all at once and, rather than waiting for a response to be received for the first request moving onto sending the second, all requests will be sent and processed as responses are returned. This can significantly shorten the time required to collectively complete all the requests. However, care should be taken not to overload a single host with requests when using this.
+Because it is written C, the cURL extension has one feature that cannot be replicated exactly in libraries written in PHP: the ability to run multiple requests in parallel on a single connection. What this means is that multiple requests can be provided to cURL all at once and, rather than waiting for a response to be received for the first request moving onto sending the second, all requests will be sent and processed as responses are returned. This can significantly shorten the time required to collectively complete all the requests. However, care should be taken not to overload a single host with requests when using this.
 
 <code php>
 <?php
