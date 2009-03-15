@@ -1,0 +1,151 @@
+=t=SimpleXML Extension=1=
+
+Like the DOM extension, the SimpleXML extension provides a tree parser. However, the DOM extension keeps an API fairly consistent with that of the standard on which it is based. The API offered by SimpleXML is one that most PHP developers will find to be less massive and more intuitive and easy to use compared to that of the DOM. 
+
+SimpleXML makes use of the flexibility and versatility of PHP arrays by using them to access both individual elements from a collection with the same element name as well as element attributes. It also adds iterability to markup documents, making them simple to traverse.
+
+However, these advantages do not come without cost. Like other tree parsers, SimpleXML must parse the entire document before it can be used. As such, it tends to be slower when parsing larger documents than a pull parser like XMLReader (which will be covered later). For a script dealing with a smaller document, however, SimpleXML works well in a pinch.
+
+=1=Loading a Document=1=
+
+Where ''DOMDocument'' is the central class in the DOM extension, ''SimpleXMLElement'' is its counterpart in the SimpleXML extension. Loading a markup document is as simple as specifying it via the class constructor.
+
+<code php>
+<?php
+// Loads markup already contained within a string
+$sxe = new SimpleXMLElement($markupString);
+
+// Loads markup contained within an external file
+$sxe = new SimpleXMLElement($filePath, null, true);
+?>
+</code>
+
+The constructor's second parameter (specified as ''null'' in the second example shown above) allows for further configuration of the instance. For documents with less than valid markup, using the value ''LIBXML_NOERROR | LIBXML_NOWARNING'' for this parameter may be useful as it suppresses error and warning reports.
+
+=1=Accessing Elements=1=
+
+Use of SimpleXML looks a bit like XPath expressions, except that the same effect is accomplished programmatically through the API rather than via formatted expressions stored in strings. Unlike XPath expressions, SimpleXML automatically assumes that element access is relative to the root node.
+
+<code php>
+<?php
+$markupString = ' 
+    <html>
+    <body>
+    <ul id="thelist">
+      <li>Foo</li>
+      <li>Bar</li>
+    </ul>
+    </body>
+    </html>
+';
+
+// Outputs "Foo" -- note that the "html" element isn't referenced
+$sxe = new SimpleXMLElement($markupString);
+echo $sxe->body->ul->li[0];
+
+// Also works, assumes the first "li" element if several are present
+echo $sxe->body->ul->li;
+
+// Also outputs "Foo" -- note that "html" is referenced this time
+$doc = new DOMDocument();
+$doc->loadHTML($markupString);
+$xpath = new DOMXPath($doc);
+echo $xpath->evaluate('/html/body/ul/li[0]');
+
+// Outputs "ul"
+echo $sxe->body->ul->getName(), PHP_EOL;
+
+// Outputs "Foo" then "Bar" 
+foreach ($sxe->body->ul->li as $li) {
+    echo $li, PHP_EOL;
+}
+
+// Does the same thing
+foreach ($sxe->body->ul->children() as $li) {
+    echo $li, PHP_EOL;
+}
+</code>
+
+When referencing a child element of the current element (via the ''body'' property of ''$sxe'' above, for example), note that the child element being accessed is also an instance of ''SimpleXMLElement''. This means it's not only possible to chain element access, but also to reference the last element in such a chain using a variable. See the first ''foreach'' loop shown above for an example of both of these.
+
+=1=Accessing Attributes=1=
+
+Where element access makes use of enumerated arrays for accessing multiple elements with the same name on the same hierarchical level, attribute access makes use of associative arrays. The example below assumes that ''$markupString'' has the sample value as in the previous example.
+
+<code php>
+<?php
+// Outputs "thelist"
+echo $sxe->body->ul['id'];
+
+// Outputs "id=thelist"
+foreach ($sxe->body->ul->attributes() as $name => $value) {
+    echo $name, '=', $value, PHP_EOL;
+}
+
+// Another way to output "thelist"
+$attrs = $sxe->body->ul->attributes();
+echo $attrs->id;
+?>
+</code>
+
+What the ''attributes()'' method actually returns is a ''SimpleXMLElement'' instance that provides access to attribute names and values in the same way that ''SimpleXMLElement'' normally makes child elements and their values available. As such, the returned instance can be used as the subject of a ''foreach'' loop to iterate over the properties that it exposes.
+
+<code html>
+<!-- What's really there -->
+<ul id="thelist"></ul>
+
+<!-- What attributes() exposes as a SimpleXMLElement instance -->
+<ul>
+  <id>thelist</id>
+</ul>
+</code>
+
+=1=Comparison=1=
+
+To compare an element or attribute with a string value, you must first explicitly cast it to a string. Otherwise, it will be treated as an object, which may causes type issues to the extent of emitting errors.
+
+<code php>
+<?php
+if ((string) $sxe->body->ul['id'] == 'thelist') {
+    echo htmlentities((string) $sxe->body->ul['id']);
+}
+?>
+</code>
+
+=1=DOM Interoperability=1=
+
+With both the DOM and SimpleXML extensions being tree parsers, this allows for a certain degree of interoperability between the two. This can be handy if you prefer one over the other when refactoring legacy code or if you have use cases for both within a single application.
+
+<code php>
+<?php
+// Converts a SimpleXMLElement to a DOMElement
+$domElement = dom_import_simplexml($simpleXmlElement);
+
+// Converts a DOMNode to a SimpleXMLElement
+$simpleXmlElement = simplexml_import_dom($domNode);
+?>
+</code>
+
+=1=XPath=1=
+
+Like the DOM extension, SimpleXML also supports XPath. Rather than using a separate class for it as the DOM does, the ''SimpleXMLElement'' class itself includes a method for it. Where the ''query()'' and ''evaluate()'' methods of the ''DOMXPath'' class return a ''DOMNodeList'' instance, the ''xpath'' method of ''SimpleXMLElement'' instead returns an enumerated array of ''SimpleXMLElement'' instances that match the given XPath expression.
+
+<code php>
+<?php
+// Returns all list items from the previous example
+$elements = $sxe->xpath('//ul[id="thelist"]/li');
+
+// Outputs "Foo" then "Bar"
+foreach ($elements as $li) {
+    echo $li, PHP_EOL;
+}
+?>
+</code>
+
+=1=The Ultimate Sophistication=1=
+
+This concludes the chapter. Hopefully it's given you a good idea of how the SimpleXML extension functions and the ease of us it provides. One thing to note is that this chapter hasn't really shown very many practical examples of its usage. This is best learned simply by experimentation with real world data. Eventually, you will get a feel for when SimpleXML can be used and when DOM should be the preferred solution.
+
+{{SimpleXML Resources
+
+For SimpleXML documentation in the PHP manual, see http://php.net/manual/en/book.simplexml.php.}}
