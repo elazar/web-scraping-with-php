@@ -156,7 +156,9 @@ The HTTP stream wrapper has not no context options for HTTP authentication crede
 
 <code php>
 <?php
-$response = file_get_contents('http://username:password@localhost.example');
+$response = file_get_contents(
+    'http://username:password@localhost.example'
+);
 ?>
 </code>
 
