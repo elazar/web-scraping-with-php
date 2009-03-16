@@ -90,6 +90,8 @@ Tidy includes a large number of configuration options, only a few of which are r
 
 Two options deal with output formats applicable for web scraping: ''output-html'' and ''output-xhtml''. Both are specified as boolean values. These options are mutually exclusive, meaning that only one can be set to ''true'' at any given time. Generally ''output-xhtml'' is preferable, but may not always be feasible to use. It's important to compare tidy output to the original document to confirm that correction of document malformations hasn't resulted in data loss.
 
+Document encoding is one area where issues may arise later depending on the configuration of tidy when it's used. For example, the XMLReader extension uses UTF-8 encoding internally, which may be problematic if your input document's encoding conflicts. ''input-encoding'' and ''output-encoding'' can be used to control the assumed encoding for each.
+
 Other options are useful mainly for debugging purposes and should generally be turned off in production environments. This is a good reason for subclassing the ''tidy'' class to control default option values, so that two separate sets are easily accessible for different development environments.
 
 Three of these options are ''indent'', ''indent-spaces'', and ''indent-attributes''. The first of these, ''indent'', is a boolean value indicating whether tidy should apply indentation to make the hierarchical relationships between elements more visually prominent. ''indent-spaces'' is an integer containing the number of whitespace characters used to denote a single level of indentation, defaulting to 2. Lastly, ''indent-attributes'' is a boolean value indicating whether each individual attribute within an element should begin on a new line. 
