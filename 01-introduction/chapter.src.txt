@@ -10,6 +10,8 @@ This book is targeted at developers of an intermediate or advanced level who alr
 
 If you come across a PHP function with which you are not familiar, try pointing your preferred web browser at http://php.net/functionname where "functionname" is the name of the function in question. This will generally direct you to either that function's entry in the manual or the landing page for the manual section that contains that function entry.
 
+Beyond that, the chapters can be read independently, but do interrelate in such a way that reading the book from cover to cover may be useful to form a more complete understanding of the material.
+
 =1=What exactly is web scraping?=1=
 
 Web scraping is a process involving the retrieval a semi-structured document from the internet, generally a web page in a markup language such as HTML or XHTML, and analysis of that document in order to extract specific data from it for use in another context. It is commonly (though not entirely accurately) also known as screen scraping. Web scraping does not technically fall within the field of data mining because the latter implies an attempt to discern semantic patterns or trends in large data sets that have already been obtained. Web scraping applications (also called intelligent, automated, or autonomous agents) are concerned only with obtaining the data itself through retrieval and extraction and can involve data sets of significantly varied sizes.
@@ -34,7 +36,7 @@ Some data providers may only offer a web site while others may offer APIs that d
 
 It is common practice to avoid making changes that break backward-compatibility with existing applications that use web service APIs, or to version them to allow application vendors time to transition to new revisions. As such, web services are significantly less prone to be altered than the markup structure of pages on a web site, especially without advance warning. This is especially true of sites that change frequently, which can drastically affect the stability of applications that employ web scraping.
 
-In short, web scraping should be used as a last resort when no other feasible options for acquiring the needed data are available.
+In a nutshell, web scraping should be used as a last resort when no other feasible options for acquiring the needed data are available.
 
 =1=Under what conditions is web scraping acceptable?=1=
 
@@ -52,7 +54,7 @@ Chapter 8 goes into developing a custom client library and common concerns when 
 
 Chapter 9 details use of the tidy extension for correcting issues with retrieved markup prior to using other extensions to analyze it.
 
-Chapter 10 reviews the DOM extension, the two classes of XML parsers and differences between them, and a brief introduction to XPath.
+Chapters 10-12 review various XML extensions for PHP, compare and contrast the two classes of XML parsers, and provide a brief introduction to XPath.
 
 =1=OK, I've done my homework. How do I get started with web scraping?=1=
 
