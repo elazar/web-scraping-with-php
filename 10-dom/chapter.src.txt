@@ -6,7 +6,7 @@ The namesake of this chapter is the Document Object Model (DOM) extension. This 
 
 {{DOM XML
 
-The DOM extension is only available in PHP 5. Its PHP 4-compatible predecessor, the DOM XML extension, has a somewhat different API but shares many of the same concepts. Examples in this chapter will be restricted to the DOM extension. The related section of the PHP manual can be consulted for equivalent specifics in the DOM XML extension at http://php.net/manual/en/book.domxml.php.}}
+The DOM extension is only available in PHP 5. Its PHP 4-compatible predecessor, the DOM XML extension, has a somewhat different API but shares many of the same concepts. Examples in this chapter will be restricted to the DOM extension. The related section of the PHP manual can be consulted for equivalent specifics in the DOM XML extension at ''http://php.net/manual/en/book.domxml.php''.}}
 
 =1=Types of Parsers=1=
 
@@ -279,8 +279,8 @@ Only a fraction of what XPath offers has been covered here, mainly basic concept
 
 {{DOM Resources
 
-- DOM documentation in the PHP manual: http://php.net/dom
-- An excellent overview of XML and XPath: http://schlitt.info/opensource/blog/0704_xpath.html
-- More information on XML: http://en.wikibooks.org/wiki/XML:_Managing_Data_Exchange
-- DOM Level 3 Core standard: http://www.w3.org/TR/DOM-Level-3-XPath
-- DOM Level 3 XPath standard: http://www.w3.org/TR/DOM-Level-3-Core}}
+- DOM documentation in the PHP manual: ''http://php.net/dom''
+- An excellent overview of XML and XPath: ''http://schlitt.info/opensource/blog/0704_xpath.html''
+- More information on XML: ''http://en.wikibooks.org/wiki/XML:_Managing_Data_Exchange''
+- DOM Level 3 Core standard: ''http://www.w3.org/TR/DOM-Level-3-XPath''
+- DOM Level 3 XPath standard: ''http://www.w3.org/TR/DOM-Level-3-Core''}}

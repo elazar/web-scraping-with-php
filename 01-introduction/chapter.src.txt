@@ -8,7 +8,7 @@ This book is targeted at developers of an intermediate or advanced level who alr
 
 =1=Any tips for how to read the book?=1=
 
-If you come across a PHP function with which you are not familiar, try pointing your preferred web browser at http://php.net/functionname where "functionname" is the name of the function in question. This will generally direct you to either that function's entry in the manual or the landing page for the manual section that contains that function entry.
+If you come across a PHP function with which you are not familiar, try pointing your preferred web browser at ''http://php.net/functionname'' where ''functionname'' is the name of the function in question. This will generally direct you to either that function's entry in the manual or the landing page for the manual section that contains that function entry.
 
 Beyond that, the chapters can be read independently, but do interrelate in such a way that reading the book from cover to cover may be useful to form a more complete understanding of the material.
 

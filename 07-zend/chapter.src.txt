@@ -204,5 +204,5 @@ As of writing, ''Zend_Http_Client'' only supports Basic HTTP authentication. Acc
 
 {{Zend_Http_Client References
 
-For the reference guide section on Zend_Http_Client, see http://framework.zend.com/manual/en/zend.http.html.
-For API documentation on all classes in the Zend_Http package, see http://framework.zend.com/apidoc/core/classtrees_Zend_Http.html.}}
+For the reference guide section on Zend_Http_Client, see ''http://framework.zend.com/manual/en/zend.http.html''.
+For API documentation on all classes in the Zend_Http package, see ''http://framework.zend.com/apidoc/core/classtrees_Zend_Http.html''.}}

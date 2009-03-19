@@ -185,6 +185,6 @@ The ''attach'' method in ''HTTP_Request'' takes a single parameter, a listener i
 
 For more information on the PEAR packages covered here, see these resources.
 
-- http://pear.php.net/manual/en/package.http.http-request.php 
-- http://pear.php.net/manual/en/package.http.http-client.php 
-- http://pear.php.net/manual/en/package.http.http-request.listeners.php}} 
+- ''http://pear.php.net/manual/en/package.http.http-request.php'' 
+- ''http://pear.php.net/manual/en/package.http.http-client.php'' 
+- ''http://pear.php.net/manual/en/package.http.http-request.listeners.php''}} 

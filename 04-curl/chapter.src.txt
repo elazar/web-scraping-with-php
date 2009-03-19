@@ -265,6 +265,6 @@ curl_multi_close($mh);
 
 {{cURL in the PHP Manual
 
-For more information on the cURL extension, see http://php.net/manual/en/book.curl.php.
-For information on installing the cURL extension, see http://php.net/manual/en/curl.installation.php.
-For information on the cURL extension configuration constants, see http://php.net/manual/en/function.curl-setopt.php.}}
+For more information on the cURL extension, see ''http://php.net/manual/en/book.curl.php''.
+For information on installing the cURL extension, see ''http://php.net/manual/en/curl.installation.php''.
+For information on the cURL extension configuration constants, see ''http://php.net/manual/en/function.curl-setopt.php''.}}

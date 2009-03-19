@@ -4,7 +4,7 @@ The pecl_http extension became available in PHP 5 and gained a class for HTTP re
 
 Another major difference is that the cURL extension is considered to be part of the PHP core, which means that it is more likely to be present in most environments supporting PHP. In contrast, pecl_http must be installed via the pecl installer or compiled manually from source. In either case, the extension requires the PHP and libcurl development headers to be present in order to compile properly. Not technically being part of the PHP core, it is less likely to be present or available in shared hosting environments depending on the hosting provider. This may be a concern for code that is intended to be distributed for use in a variety of environments.
 
-To install pecl_http via the pecl installer, PEAR must be installed (see http://pear.php.net/manual/en/installation.php). A package for PEAR may also be available through your OS package manager. Once it is installed, simply issue the command ''pecl install pecl_http''. To install from source, download the latest version from http://pecl.php.net/get/pecl_http. Note that this requires the header files for the PHP version you are using, which are contained in the PHP source tarballs available for download at http://www.php.net/downloads.php or possibly also through your OS package manager.
+To install pecl_http via the pecl installer, PEAR must be installed (see ''http://pear.php.net/manual/en/installation.php''). A package for PEAR may also be available through your OS package manager. Once it is installed, simply issue the command ''pecl install pecl_http''. To install from source, download the latest version from ''http://pecl.php.net/get/pecl_http''. Note that this requires the header files for the PHP version you are using, which are contained in the PHP source tarballs available for download at ''http://www.php.net/downloads.php'' or possibly also through your OS package manager.
 
 =1=Back to Basics=1=
 
@@ -78,8 +78,8 @@ $response = $request->send();
 
 {{Alternative Methods and More Options
 
-For request method constants beyond GET and POST used by the procedural API, see http://php.net/manual/en/http.constants.php.
-For more on available request options for both APIs, see http://php.net/manual/en/http.request.options.php.}}
+For request method constants beyond GET and POST used by the procedural API, see ''http://php.net/manual/en/http.constants.php''.
+For more on available request options for both APIs, see ''http://php.net/manual/en/http.request.options.php''.}}
 
 =1=Handling Headers=1=
 
@@ -281,5 +281,5 @@ $pool->send();
 
 {{pecl_http in the PHP Manual
 
-For more information on the pecl_http extension, see http://php.net/http.
-For more information on its request options, http://php.net/manual/en/http.request.options.php.}}
+For more information on the pecl_http extension, see ''http://php.net/http''.
+For more information on its request options, ''http://php.net/manual/en/http.request.options.php''.}}

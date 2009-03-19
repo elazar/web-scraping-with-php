@@ -8,7 +8,7 @@ There are a number of available XML-focused PHP extensions that can deal with ma
 
 =1=Validation=1=
 
-The World Wide Web Consortium (W3C) provides a markup validation service in order to promote adherence to web standards. You can access this service by going to http://validator.w3.org. It accepts markup to be tested by URL, file upload, or direct input. This will give you an indication of what issues, if any, your document has with markup malformation.
+The World Wide Web Consortium (W3C) provides a markup validation service in order to promote adherence to web standards. You can access this service by going to ''http://validator.w3.org''. It accepts markup to be tested by URL, file upload, or direct input. This will give you an indication of what issues, if any, your document has with markup malformation.
 
 =1=More Than One Way=1=
 
@@ -200,6 +200,6 @@ This concludes the chapter. At this point, you should have your obtained documen
 
 {{Tidy References 
 
-For the PHP manual section on the tidy extension, see http://php.net/tidy.
-For documentation on the tidy library itself, see http://tidy.sourceforge.net/#docs.
-For a tidy configuration setting reference, see http://tidy.sourceforge.net/docs/quickref.html.}}
+For the PHP manual section on the tidy extension, see ''http://php.net/tidy''.
+For documentation on the tidy library itself, see ''http://tidy.sourceforge.net/#docs''.
+For a tidy configuration setting reference, see ''http://tidy.sourceforge.net/docs/quickref.html''.}}

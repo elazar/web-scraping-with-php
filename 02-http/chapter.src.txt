@@ -18,12 +18,12 @@ Second, you must be able to use most of the features offered by a PHP HTTP clien
 
 This book will cover HTTP in sufficient depth as it relates to web scraping, but should not in any respect be considered a comprehensive guide on the subject. Here are a few recommended references to supplement the material covered in this book.
 
-- RFC 2616 HyperText Transfer Protocol -- HTTP/1.1 (http://www.ietf.org/rfc/rfc2616.txt)
-- RFC 3986 Uniform Resource Identifiers (URI): Generic Syntax (http://www.ietf.org/rfc/rfc3986.txt)
+- RFC 2616 HyperText Transfer Protocol -- HTTP/1.1 (''http://www.ietf.org/rfc/rfc2616.txt'')
+- RFC 3986 Uniform Resource Identifiers (URI): Generic Syntax (''http://www.ietf.org/rfc/rfc3986.txt'')
 - "HTTP: The Definitive Guide" (ISBN 1565925092)
 - "HTTP Pocket Reference: HyperText Transfer Protocol" (ISBN 1565928628)
 - "HTTP Developer's Handbook" (ISBN 0672324547)
-- Ben Ramsey's blog series on HTTP (http://benramsey.com/http-status-codes)}}
+- Ben Ramsey's blog series on HTTP (''http://benramsey.com/http-status-codes'')}}
 
 =2=GET Requests=2=
 
@@ -213,7 +213,7 @@ Clients are sometimes referred to as user agents. This refers to the fact that w
 
 Unfortunately, some applications will engage in a practice known as **user agent sniffing** or **browser sniffing** in which they vary the responses they deliver displayed based on the user agent string provided by the client. This can include completely disabling a primary site feature, such as an e-commerce checkout page that uses ActiveX (a technology specific to Windows and Internet Explorer).
 
-One well-known application of this technique is the robots exclusion standard, which is used to explicitly instruct crawlers to avoid accessing individual resources or the entire web site. More information about this is available at http://www.robotstxt.org. The guidelines detailed there should definitely be accounted for when developing a web scraping application so as to prevent it from exhibiting behavior inconsistent with that of a normal user.
+One well-known application of this technique is the robots exclusion standard, which is used to explicitly instruct crawlers to avoid accessing individual resources or the entire web site. More information about this is available at ''http://www.robotstxt.org''. The guidelines detailed there should definitely be accounted for when developing a web scraping application so as to prevent it from exhibiting behavior inconsistent with that of a normal user.
 
 In some cases, a client practice called **user agent spoofing** involving the specification of a false user agent string is enough to circumvent user agent sniffing, but not always. An application may have platform-specific requirements that legitimately warrant it denying access to certain user agents. In any case, spoofing the user agent is a practice that should be avoided to the fullest extent possible.
 

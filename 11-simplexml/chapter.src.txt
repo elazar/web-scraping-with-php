@@ -148,4 +148,4 @@ This concludes the chapter. Hopefully it's given you a good idea of how the Simp
 
 {{SimpleXML Resources
 
-For SimpleXML documentation in the PHP manual, see http://php.net/manual/en/book.simplexml.php.}}
+For SimpleXML documentation in the PHP manual, see ''http://php.net/manual/en/book.simplexml.php''.}}

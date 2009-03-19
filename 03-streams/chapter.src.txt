@@ -174,5 +174,5 @@ All other features utilizing headers must be implemented manually by specifying 
 
 {{HTTP Streams Wrapper in the PHP Manual
 
-For more information about the HTTP streams wrapper itself, see http://www.php.net/manual/en/wrappers.http.php.
-For details about the context options specific to the wrapper, see http://www.php.net/manual/en/context.http.php.}}
+For more information about the HTTP streams wrapper itself, see ''http://www.php.net/manual/en/wrappers.http.php''.
+For details about the context options specific to the wrapper, see ''http://www.php.net/manual/en/context.http.php''.}}
