@@ -1,0 +1,163 @@
+=t=XMLReader Extension=1=
+
+The previous two chapters have covered two available XML extensions that implement tree parsers. This chapter will focus on the XMLReader extension, which implements a pull parser.
+
+As mentioned in the chapter on the DOM extension, pull parsers differ from tree parsers in that they read documents in a piecewise fashion rather than loading them up into memory all at once. A consequence of this is that pull parsers generally only traverse documents once in one direction and leave you to collect whatever data is relevant to you along the way.
+
+Before getting started, a noteworthy point is that XMLReader's underlying library, libxml, uses UTF-8 encoding internally. As such, encoding issues will be mitigated if any document you imported (particularly one that's been cleaned using the tidy extension) is encoded appropriately to avoid issues with conflicting encodings.
+
+{{XML Parser
+
+The XML Parser extension, as it is referred to in the PHP manual, is a predecessor of XMLReader and an alternative for PHP 4 environments. Its API is oriented to a more event-driven style of programming as opposed to the iterative orientation of the XMLReader extension. For more information on the XML Parser extension, see ''http://php.net/manual/en/book.xml.php''.}}
+
+=1=Loading a Document=1=
+
+The focal class of the XMLReader extension is aptly named ''XMLReader''. It doesn't declare a constructor, but rather has offers two methods for introducing XML data into it.
+
+<code php>
+<?php
+// Loads a document contained within a string
+$doc = XMLReader::xml($xmlString);
+
+// Loads a document from an external file
+$doc = XMLReader::open($filePath);
+?>
+</code>
+
+Both of these methods have two additional parameters.
+
+The second parameter is a string specifying the encoding scheme for the input document. It is optional and defaults to '''UTF-8''' if unspecified or specified as ''null''. Valid values for this parameter aren't included in the PHP manual, but can be found in the reference for the underlying libxml2 library at ''http://www.xmlsoft.org/encoding.html#Default''.
+
+The third parameter is an integer value that can be set in bitmask fashion using constants from the libxml extension. This is the preferred method to configure the parser over using the deprecated ''setParserProperty()'' method. The specific constants that can be used to form the bitmask (using the bitwise OR operator ''|'') are listed below. Descriptions for them can be found at ''http://php.net/manual/en/libxml.constants.php''.
+
+- ''LIBXML_COMPACT''
+- ''LIBXML_DTDATTR''
+- ''LIBXML_DTDLOAD''
+- ''LIBXML_DTDVALID''
+- ''LIBXML_NOBLANKS''
+- ''LIBXML_NOCDATA''
+- ''LIBXML_NOENT''
+- ''LIBXML_NOERROR''
+- ''LIBXML_NONET''
+- ''LIBXML_NOWARNING''
+- ''LIBXML_NSCLEAN''
+- ''LIBXML_XINCLUDE''
+
+As an example, a call that configured the parser to suppress errors and warnings might look like this.
+
+<code php>
+<?php
+$doc = XMLReader::xml(
+    $xmlString,
+    null,
+    LIBXML_NOERROR | LIBXML_NOWARNING
+);
+?>
+</code>
+
+=1=Iteration=1=
+
+The ''XMLReader'' instance acts as both an iterator over the entire document as well as a data object for the current node pointed to by the iterator. It contains a set of read-only properties (described at ''http://php.net/manual/en/class.xmlreader.php'') that represent those of the current node and are updated as the iterator position changes.
+
+<code php>
+<?php
+while ($doc->read()) {
+    // ...
+}
+?>
+</code>
+
+The ''read()'' method attempts to move the iterator position to the next node and returns a boolean value indicating whether or not it was successful. That is, it returns ''false'' once it reaches the end of the document. As such, it's perfect for use in a ''while'' loop as shown above.
+
+=1=Nodes=1=
+
+As in other extensions, each node has a type that is stored in the reader's ''nodeType'' property. The types in which you are generally interested are still elements (''XMLReader::ELEMENT'') and attributes (''XMLReader::ATTRIBUTE''), possibly also text (''XMLReader::TEXT'') and CDATA (''XMLReader::CDATA'') elements as well. Additionally, the XMLReader extension has a node type for ending elements (i.e. closing tags), ''XMLReader::END_ELEMENT''. Its importance will become more obvious in the next section.
+
+The example below shows how to check the node type against an appropriate constant. For a list of these constants, see the section entitled "XMLReader Node Types" at ''http://php.net/manual/en/class.xmlreader.php''.
+
+<code php>
+<?php
+while ($doc->read()) {
+    if ($doc->nodeType == XMLREADER::ELEMENT) {
+        var_dump($doc->localName);
+        var_dump($doc->value);
+        var_dump($doc->hasValue);
+    }
+}
+?>
+</code>
+
+Also like other extensions, nodes have names. There are two properties for this, ''name'' and ''localName''. The former represents the fully qualified name, including the namespace specification, while the latter represents the node name by itself and is the one you will generally want to use.
+
+=1=Elements and Attributes=1=
+
+Attribute nodes can have values. When the iterator points to an attribute node, the ''value'' property will be populated with the node's value and the ''hasValue'' property can be used to check for its presence.
+
+Element nodes can have attributes. When the iterator points to an element node, the ''hasAttributes'' property indicates the presence of attributes and the ''getAttribute()'' method can be used to obtain an attribute value in the form of a string.
+
+The example below uses both of these together to parse data from an HTML table.
+
+<code php>
+<?php
+$inTable = false;
+$tableData = array();
+
+while ($doc->read()) {
+    switch ($doc->nodeType) {
+        case XMLREADER::ELEMENT:
+            if ($doc->localName == 'table'
+                && $doc->getAttribute('id') == 'thetable') {
+                $inTable = true;
+            } elseif ($doc->localName == 'tr' && $inTable) {
+                $row = count($tableData);
+                $tableData[$row] = array();
+            } elseif ($doc->localName == 'td' && $inTable) {
+                $tableData[$row][] = $doc->readString();
+            }
+            break;
+        case XMLREADER::END_ELEMENT:
+            if ($doc->localName == 'table' && $inTable) {
+                $inTable = false;
+            }
+            break;
+    }
+}
+?>
+</code>
+
+This showcases the main difference between pull parsers and tree parsers: the former have no concept of hierarchical context, only of the node to which the iterator is currently pointing. As such, you must create your own indicators of context where they are needed.
+
+In this example, the node type is checked as nodes are read and any node that isn't either an opening or closing element is ignored. If an opening element is encountered, its name (''$doc->localName'') is evaluated to confirm that it's a table and its ''id'' attribute value (''$doc->getAttribute('id')'') is also examined to confirm that it has a value of '''thetable'''. If so, a flag variable ''$inTable'' is set to ''true''. This is used to indicate to subsequent ''if'' branch cases that the iterator points to a node that is within the desired table.
+
+The next ''if'' branch is entered when table row elements within the table are encountered. A combination of checking the node name and the previously set ''$inTable'' flag facilitates this. When the branch is entered, a new element in the ''$tableData'' array is initialized to an empty array. This array will later store data from cells in that row. The key associated with the row in ''$tableData'' is stored in the ''$row'' variable.
+
+Finally, the last ''if'' branch executes when table cell elements are encountered. Like the row branch, this branch checks the node name and the ''$inTable'' flag. If the check passes, it then stores the current node's value in the array associated with the current table row.
+
+Here's where the ''XMLREADER::END_ELEMENT'' node type comes into play. Once the end of the table is reached, no further data should be read into the array. So, if the ending element has the name '''table''' and the ''$inTable'' flag currently indicates that the iterator points to a node within the desired table, the flag is then set to ''false''. Since no other tables should theoretically have the same id attribute, no ''if'' branches will execute in subsequent ''while'' loop iterations.
+
+If this table was the only one of interest in the document, it would be prudent to replace the ''$inTable = false;'' statement with a ''break 2;'' statement. This would terminate the ''while'' loop used to read nodes from the document as soon as the end of the table was encountered, preventing any further unnecessary read operations.
+
+{{''readString()'' Availability
+
+As its entry in the PHP manual notes, the ''readString()'' method used in the above example is only present when the XMLReader extension is compiled against certain versions of the underlying libxml library.
+
+If this method is unavailable in your environment, an alternative in the example would be to have opening and closing table cell checks that toggle their own flag (''$inCell'' for example) and ''switch'' cases for the TEXT and CDATA node types that check this flag and, when it is set to ''true'', add the contents of the ''value'' property from the ''XMLReader'' instance to the ''$tableData'' array.}}
+
+=1=DOM Interoperation=1=
+
+One nice feature of the XMLReader extension is the ''expand()'' method, which returns an object of the equivalent DOM extension class for the node to which the iterator currently points. Element nodes, for example, cause this method to return a ''DOMElement'' instance.
+
+The example below illustrates a modification to the previous example and provides another alternative to the ''readString()'' method for getting at the contents of table cells by taking advantage of this DOM interoperability.
+
+<code php>
+<?php
+if ($doc->localName == 'td' && $inTable) {
+    $node = $doc->expand();
+    $tableData[$row][] = $node->nodeValue; 
+}
+?>
+</code>
+
+=1=Closing Down=1=
+
+Once all necessary read operations have been conducted on a document, the ''close()'' method of the ''XMLReader'' instance should be called to cleanly terminate file access or otherwise indicate that access to the original data source is no longer needed.
