@@ -1,0 +1,377 @@
+=t=CSS Selector Libraries=t=
+
+This chapter will review several libraries that are built on top of the XML extensions described in previous chapters. These libraries provide an interface that uses CSS selector expressions to query markup documents rather than a programmatic API or XPath expressions. Don't be concerned if you aren't familiar with CSS selectors, as part of this chapter showcases basic expressions alongside their XPath equivalents.
+
+=1=Logistics=1=
+
+Before getting into the "how" of using CSS selector libraries, it's probably best to get the "why" (and "why not") out of the way first. It goes without saying that these libraries add a layer of complexity to applications that use them, introducing another potential point of failure. They implement expression parsers in order to take CSS selector expressions as their input and translate them into equivalent userland operations, which can have an impact on performance.
+
+Those points aside, they do offer a syntax that is considered by some to be more intuitive. Most developers these days know at least some CSS and probably have a little experience with a JavaScript library that uses CSS selectors for node selection on the client side, such as jQuery. Thus, knowledge of that particular area is transferable to the server side when libraries based around it are used.
+
+To sum this up, if you're particularly concerned about performance or simplicity of the application in terms of the number of components it uses, it's probably best to stick with something like XPath. Otherwise, CSS selector libraries are worthy of consideration for making use of a common existing skillset.
+
+Even if your decision is to stick with XPath, keep reading. This chapter will also show some XPath equivalents for each set of explained CSS selectors, which may help to further your understanding of XPath. Note that these comparions are not necessarily comprehensive and there may be multiple ways to express the same thing in any given case. 
+
+{{jQuery Examples
+
+The documentation for the jQuery library itself actually has excellent visual client-side examples of selectors. If you find you aren't certain that you understand any of the descriptions of CSS selectors that follow, the jQuery demos and source code will likely prove to be helpful supplements. You can find them at ''http://docs.jquery.com/Selectors/''.}}
+
+=1=Basics=1=
+
+Let's look at a few basic selectors and their results when applied to a markup example.
+
+<code html>
+<html>
+<body>
+<div id="nav">
+    <ul class="horizontal">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/about-us">About Us</a></li>
+        <li><a href="/contact-us">Contact Us</a></li>
+    </ul>
+    <img src="/img/ad1.jpg" alt="Advertisement #1">
+    <img src="/img/ad2.jpg" alt="Advertisement #2">
+</div>
+</body>
+</html>
+</code>
+
+- ''#nav'' would select the ''div'' element because it has an ''id'' attribute value of ''nav''. 
+- ''li'' would select all ''li'' elements by their node name.
+- ''.horizontal'' would select the ''ul'' element because it has a class of ''horizontal''. (Note that elements can have multiple classes.)
+- ''*'' would select all elements in the document.
+- ''li, a'' would select all ''li'' and ''a'' elements in the document by combining the two selectors ''li'' and ''a'' into a comma-delimited list.
+
+Here are the XPath equivalents along side their respective CSS counterparts. Aside from the ''.class'' selector, the XPath expressions are not significantly longer or more complex.
+
+<table>
+<tr>
+  <th>Selector</th>
+  <th>CSS</th>
+  <th>XPath</th>
+</tr>
+<tr>
+  <td>id</td>
+  <td>''#nav''</td>
+  <td>''//*[@id="nav"]''</td>
+</tr>
+<tr>
+  <td>element</td>
+  <td>''li''</td>
+  <td>''//li''</td>
+</tr>
+<tr>
+  <td>class</td>
+  <td>''.horizontal''</td>
+  <td>''//*[@class="horizontal" or starts-with(@class, "horizontal ") or contains(@class, " horizontal ") or ends-with(@class, " horizontal")]''</td>
+</tr>
+<tr>
+  <td>wildcard</td>
+  <td>''*''</td>
+  <td>''//*''</td>
+</tr>
+<tr>
+  <td>multiple</td>
+  <td>''li, a''</td>
+  <td>''//li|//a''</td>
+</tr>
+</table>
+
+=1=Hierarchical Selectors=1=
+
+Now let's move on to hierarchical selectors, which use document structure as a way to select elements, using the previous markup example.
+
+- ''body ul'' would select all ''ul'' elements that are ancestors of ''body'' elements.
+- ''ul > li'' would select all ''li'' elements that are children of ''ul'' elements.
+- ''ul + img'' would select all ''img'' elements that immediately follow a ''ul'' sibling element.
+- ''ul ~ img'' would select all ''img'' elements that follow a ''ul'' sibling element. 
+
+The third and fourth items in this list probably look fairly similar. The difference is in the word "immediately." By this example, the third item in the list would only select the Advertisment #1 image because it comes immediately after its ''ul'' sibling element in the document. The fourth item in the list, on the other hand, would select both images because both follow their ''ul'' sibling element.
+
+<table>
+<tr>
+  <th>Selector</th>
+  <th>CSS</th>
+  <th>XPath</th>
+</tr>
+<tr>
+  <td>ancestor descendant</td>
+  <td>''body ul''</td>
+  <td>''//body//ul''</td>
+</tr>
+<tr>
+  <td>parent > child</td>
+  <td>''ul > li''</td>
+  <td>''//ul/li''</td>
+</tr>
+<tr>
+  <td>prev + next</td>
+  <td>''ul + img''</td>
+  <td>''//ul/following-sibling::img[1]''</td>
+</tr>
+<tr>
+  <td>prev ~ siblings</td>
+  <td>''ul ~ img''</td>
+  <td>''//ul/following-sibling::img''</td>
+</tr>
+</table>
+
+=1=Basic Filters=1=
+
+The selectors reviewed up to this point in the chapter have always changed the type of nodes being selected. Conversely, when a filter is appended to an expression, it merely restricts the returned set of nodes to a subset of those matching the original expression.
+
+- ''li:first'' selects only the first ''li'' node found in the document.
+- ''li:last'' likewise selects the last ''li'' node found in the document.
+- ''li:even'' selects all evenly positioned nodes in the document beginning from 0.
+- ''li:odd'' likewise selects all oddly positioned nodes in the document, also beginning from 0.
+- ''li:eq(0)'' selects the ''li'' node with a position of 0 within the set of ''li'' nodes (i.e. the first one) in the document. 
+- ''li:gt(0)'' selects all ''li'' nodes with a position greater than 0 within the set of ''li'' nodes (i.e. all but the first one) in the document.
+- ''li:lt(1)'' selects all ''li'' nodes with a position less than 1 within the set of ''li'' nodes (i.e. the first one) in the document.
+- '':header'' matches all header nodes. (i.e. h1, h2, etc.)
+- '':not(:first)'' negates the '':first'' selector and thus selects all ''li'' nodes except the first one in the document. 
+
+<table>
+<tr>
+  <th>Selector</th>
+  <th>CSS</th>
+  <th>XPath</th>
+</tr>
+<tr>
+  <td>first node</td>
+  <td>''li:first''</td>
+  <td>''//li[1]''</td>
+</tr>
+<tr>
+  <td>last node</td>
+  <td>''li:last''</td>
+  <td>''//li[last()]''</td>
+</tr>
+<tr>
+  <td>even nodes</td>
+  <td>''li:even''</td>
+  <td>''//li[position() mod 2 = 0]''</td>
+</tr>
+<tr>
+  <td>odd nodes</td>
+  <td>''li:odd''</td>
+  <td>''//li[position() mod 2 = 1]''</td>
+</tr>
+<tr>
+  <td>specific node</td>
+  <td>''li:eq(0)''</td>
+  <td>''//li[1]''</td>
+</tr>
+<tr>
+  <td>all nodes after</td>
+  <td>''li:gt(0)''</td>
+  <td>''//li[position() > 1]''</td>
+</tr>
+<tr>
+  <td>all nodes before</td>
+  <td>''li:lt(1)''</td>
+  <td>''//li[position() < 2]''</td>
+</tr>
+<tr>
+  <td>header nodes</td>
+  <td>'':header''</td>
+  <td>''//h1|//h2|//h3|//h4|//h5|//h6''</td>
+</tr>
+<tr>
+  <td>all nodes not matching an expression</td>
+  <td>'':not(:first)''</td>
+  <td>''//*[not(position() = 1)]''</td>
+</tr>
+</table>
+
+Note when reading this table that CSS selectors begin set indices at 0 whereas XPath begins them at 1.
+
+=1=Content Filters=1=
+
+Where basic filters are based mainly on the type of node or its position in the result set, content filters are based on node value or surrounding hierarchical structure.
+
+- ''a:contains("About Us");'' selects all ''a'' nodes where the node value contains the substring ''"About Us"''.
+- ''img:empty'' selects all ''img'' nodes that contain no child nodes (including text nodes).
+- ''li:has(a:contains("About Us"))'' selects all ''li'' nodes that contain an ''a'' node with the substring ''"About Us"'' in its noe value.
+- ''li:parent'' selects all ''li'' nodes that contain child nodes (including text nodes).
+
+<table>
+<tr>
+  <th>Selector</th>
+  <th>CSS</th>
+  <th>XPath</th>
+</tr>
+<tr>
+  <td>nodes containing text</td>
+  <td>''a:contains("About Us")''</td>
+  <td>''//a[contains(text(), "About Us")]''</td>
+</tr>
+<tr>
+  <td>nodes without children</td>
+  <td>''img:empty''</td>
+  <td>'//*[not(node())]''</td>
+</tr>
+<tr>
+  <td>nodes containing a selector match</td>
+  <td>''li:has(a:contains("About Us"))''</td>
+  <td>''//li//a[contains(text(), "About Us")]''</td>
+</tr>
+<tr>
+  <td>nodes with children</td>
+  <td>''li:parent''</td>
+  <td>''//li[node()]''</td>
+</tr>
+</table>
+
+=1=Attribute Filters=1=
+
+Filters up to this point have been specific to element nodes, but they also exist for attribute nodes. Attribute filters are surrounded by square brackets in both CSS and XPath, but differ in that CSS uses mostly operators for conditions while XPath uses mostly functions.
+
+- ''[href]'' matches all nodes that have an attribute node with the name ''href''.
+- ''[href="/home"]'' matches all nodes with an attribute node named ''href'' that has a value of ''"/home"''.
+- ''[href!="/home"]'' matches all nodes with an attribute node named ''href'' that do not have a value of ''"/home"''.
+- ''[href^="/"]'' matches all nodes with an attribute node named ''href'' and have a value that starts with ''"/"''.
+- ''[href$="-us"]'' matches all nodes with an attribute node named ''href'' and have a value that ends with ''"-us"''.
+- ''[href*="-us"]'' matches all nodes with an attribute node named ''href'' and have a value that contains ''"-us"'' anywhere within the value.
+- ''[src*="ad"][alt^="Advertisement"]'' matches all nodes that have both an attribute node named ''src'' with a value containing ''"ad"'' and an attribute node named ''alt'' with a value starting with ''"Advertisement"''.
+
+<table>
+<tr>
+  <th>Selector</th>
+  <th>CSS</th>
+  <th>XPath</th>
+</tr>
+<tr>
+  <td>has attribute</td>
+  <td>''[href]''</td>
+  <td>''//*[@href]''</td>
+</tr>
+<tr>
+  <td>has attribute value</td>
+  <td>''[href="/home"]''</td>
+  <td>''//*[@href="/home"]''</td>
+</tr>
+<tr>
+  <td>has different attribute value</td>
+  <td>''[href!="/home"]''</td>
+  <td>''//*[@href!="/home"]''</td>
+</tr>
+<tr>
+  <td>has attribute value starting with substring</td>
+  <td>''[href^="/"]''</td>
+  <td>''//*[starts-with(@href, "/")]''</td>
+</tr>
+<tr>
+  <td>has attribute value ending with substring</td>
+  <td>''[href$="-us"]''</td>
+  <td>''//*[ends-width(@href, "-us")]''</td>
+</tr>
+<tr>
+  <td>has attribute value containing substring</td>
+  <td>''[href*="-us"]''</td>
+  <td>''//*[contains(@href, "-us")]''</td>
+</tr>
+<tr>
+  <td>multiple attribute filters</td>
+  <td>''[src*="ad"][alt^="Advertisement"]''</td>
+  <td>''//*[contains(@src, "ad") and starts-with(@alt, "Advertisement")]''</td>
+</tr>
+</table>
+
+=1=Child Filters=1=
+
+Child filters are fairly similar to the basic filters reviewed earlier, except applied to child nodes.
+
+- ''ul:nth-child(2)'' selects the second child element within each ''ul'' node. The parameter passed to the filter can also be ''even'' or ''odd'' (which are figured relative to child position within the parent element) or can use expressions involving a variable ''n'' (such as ''3n'' for every third child).
+- ''li:first-child'' selects all 'li'' nodes that are the first child of their parent node.
+- ''li:last-child'' likewise selects all 'li'' nodes that are the last child of their parent node.
+- ''li:only-child'' selects all 'li'' nodes that are the only child of their parent node.
+
+<table>
+<tr>
+  <th>Selector</th>
+  <th>CSS</th>
+  <th>XPath</th>
+</tr>
+<tr>
+  <td>nth child nodes</td>
+  <td>''ul:nth-child(2)''</td>
+  <td>''//ul/*[position() = 2]''</td>
+</tr>
+<tr>
+  <td>first child nodes</td>
+  <td>''li:first-child''</td>
+  <td>''//*/*[name() = "li" and position() = 1]''</td>
+</tr>
+<tr>
+  <td>last child nodes</td>
+  <td>''li:last-child''</td>
+  <td>''//*/*[name() = "li" and position() = last()]''</td>
+</tr>
+<tr>
+  <td>only child nodes</td>
+  <td>''li:only-child''</td>
+  <td>''//*/*[name() = "li" and count() = 1]''</td>
+</tr>
+</table>
+
+=1=Form Filters=1=
+
+Form filters are just a more convenient shorthand for other expressions.
+
+- '':input'' matches all input, textarea, select, and button elements.
+- '':text'', '':hidden'', '':password'', '':radio'', '':checkbox'', '':submit'', '':image'', '':reset'', and '':file'' all matches input elements with their respective types.
+- '':button'' matches all button elements and input elements of type button.
+- '':enabled'' matches all form elements that are not disabled, '':disabled'' matches those that are.
+- '':checked'' matches all radio and checkbox elements that are checked.
+- '':selected'' matches all option elements that are selected.
+
+<table>
+<tr>
+  <th>Selector</th>
+  <th>CSS</th>
+  <th>CSS Alt</th>
+  <th>XPath</th>
+</tr>
+<tr>
+  <td>all form elements</td>
+  <td>'':input''</td>
+  <td>''input, textarea, select, button''</td>
+  <td>''//input|//textarea|//select|//button''</td>
+</tr>
+<tr>
+  <td>form elements of specific types</td>
+  <td>'':text''</td>
+  <td>''input[type="text"]''</td>
+  <td>''//input[type="text"]''</td>
+</tr>
+<tr>
+  <td>button elements</td>
+  <td>'':button''</td>
+  <td>''button, input[type="button"]''</td>
+  <td>''//button|//input[type="button"]''</td>
+</tr>
+<tr>
+  <td>enabled elements</td>
+  <td>'':enabled''</td>
+  <td>'':not([disabled="disabled"])''</td>
+  <td>''//*[contains("input textarea select button", name()) and (not(@disabled) or @disabled!="disabled"])''</td>
+</tr>
+<tr>
+  <td>disabled elements</td>
+  <td>'':disabled''</td>
+  <td>''[disabled="disabled"]''</td>
+  <td>''//*[contains("input textarea select button", name()) and @disabled="disabled"]''</td>
+</tr>
+<tr>
+  <td>checked elements</td>
+  <td>'':checked''</td>
+  <td>'':input[checked="checked"]''</td>
+  <td>''//input[contains("checkbox radio", @type) and @checked="checked"]''</td>
+</tr>
+<tr>
+  <td>selected elements</td>
+  <td>'':selected''</td>
+  <td>''option[selected="selected"]''</td>
+  <td>''//option[@selected="selected"]''</td>
+</tr>
+</table>
