@@ -120,6 +120,8 @@ The third and fourth items in this list probably look fairly similar. The differ
 
 The selectors reviewed up to this point in the chapter have always changed the type of nodes being selected. Conversely, when a filter is appended to an expression, it merely restricts the returned set of nodes to a subset of those matching the original expression.
 
+Note that available filters vary per library. Support for filters in jQuery is fairly comprehensive and as such it is used as the primary referenced for sections related to filters in this chapter.
+
 - ''li:first'' selects only the first ''li'' node found in the document.
 - ''li:last'' likewise selects the last ''li'' node found in the document.
 - ''li:even'' selects all evenly positioned nodes in the document beginning from 0.
@@ -224,7 +226,7 @@ Where basic filters are based mainly on the type of node or its position in the 
 
 =1=Attribute Filters=1=
 
-Filters up to this point have been specific to element nodes, but they also exist for attribute nodes. Attribute filters are surrounded by square brackets in both CSS and XPath, but differ in that CSS uses mostly operators for conditions while XPath uses mostly functions.
+Filters up to this point have been specific to element nodes, but they also exist for attribute nodes. Attribute filters are surrounded by square brackets in both CSS and XPath, but differ in that CSS uses mostly operators for conditions while XPath uses mostly functions. Unlike other filters described in this chapter, support for attribute filters is fairly universal between different libraries.
 
 - ''[href]'' matches all nodes that have an attribute node with the name ''href''.
 - ''[href="/home"]'' matches all nodes with an attribute node named ''href'' that has a value of ''"/home"''.
@@ -375,3 +377,43 @@ Form filters are just a more convenient shorthand for other expressions.
   <td>''//option[@selected="selected"]''</td>
 </tr>
 </table>
+
+At this point, CSS selectors have been covered to the extent that all or a subset of those supported by a given library are explain. Now onto actual library implementations.
+
+=1=PHP Simple HTML DOM Parser=1=
+
+The major distinguishing trait of this library is its requirements: PHP 5 and the PCRE extension (which is pretty standard in most PHP distributions). It has no external dependencies on or associations with other libraries or extensions, not even the standard XML extensions in PHP.
+
+The implication of this is that all parsing is handled in PHP itself, which makes it likely that performance will not be as good as libraries that build on a PHP extension. However, in environments where XML extensions (in particular the DOM extension) may not be available (which is rare), this library may be a good option. It offers basic retrieval support using PHP's filesystem functions (which require the configuration setting ''allow_url_fopen'' to be enabled to access remote documents).
+
+The documentation for this library is fairly good and can be found at ''http://simplehtmldom.sourceforge.net/manual.htm''. Its main web site, which includes a link to download the library, is available at ''http://simplehtmldom.sourceforge.net''. It is licensed under the MIT License.
+
+=1=Zend_Dom_Query=1=
+
+One of the components of Zend Framework, this library was originally created to provide a means for integration testing of applications based on the framework. However, it can function independently and apart from the framework and provides the functionality needed in the analysis phase of web scraping. Officially, Zend Framework requires PHP 5.2.4 or higher.
+
+Zend_Dom_Query makes extensive use of the DOM extension. It supports XPath through use of the DOM extension's DOMXPath class and handles CSS expressions by transforming them into equivalent XPath expressions. Note that only CSS 2 is supported, which excludes non-attribute filters. A list of differences between CSS2 and CSS3 can be found at ''http://www.w3.org/TR/css3-selectors/#changesFromCSS2''.
+
+Note that Zend_Dom_Query offers no retrieval functionality. All methods for introducing documents into it require that those documents be in string formbeforehand. If you are already using Zend Framework, a readily available option for retrieval is Zend_Http_Client, which is also discussed in this book.
+
+Documentation for Zend_Dom_Query can be found at ''http://framework.zend.com/manual/en/zend.dom.query.html''. At this time, there is no officially supported method of downloading only the Zend_Dom package. The entire framework can be downloaded from ''http://framework.zend.com/download/current/'' and the directory for the Zend_Dom package can be extracted from it. An unofficial method of downloading individual packages can be found at ''http://epic.codeutopia.net/pack/library/1.7''. Framework components are licensed under the New BSD License.
+
+=1=phpQuery=1=
+
+phpQuery is based on jQuery and is fairly similar to it insofar as its runtime environment being the server (as opposed to the client) will allow. It requires PHP 5.2 and its DOM extension as well as the Zend_Http_Client and Zend_Json components from Zend Framework, which are bundled but can be substituted with the same components from a local Zend Framework installation.
+
+CSS support is limited to a subset of CSS3. Most jQuery features are supported including plugin support, with porting of multiple jQuery plugins being panned. Other components include a CLI utility that makes functionality from the phpQuery library available from command line and a server component for integrating with jQuery via calls made from it on the client side. Retrieval support is included in the form of integration with Zend_Http_Client.
+
+Documentation and download links are available from ''http://code.google.com/p/phpquery/''. It is licensed under the MIT License.
+
+=1=DOMQuery=1=
+
+This library is actually a project of my own. While still in alpha at the time of this writing, it is fairly functional and includes a full unit test suite. Like some of the other libraries mentioned in this chapter, it requires PHP 5 and makes heavy use of the DOM extension.
+
+Unlike the others, however, it does not implement a CSS selector parser in order to offer related functionality. Instead, it does so programmatically through its API. For example, rather than passing the name of an element (say ''div'') to a central query method, an ''element()'' method accepts the name of an element for which to query. Though this makes it a bit less concise than other libraries, it also makes it more expressive and only requires a basic knowledge of DOM concepts in order to operate it.
+
+It can be downloaded at ''http://github.com/elazar/domquery/tree/master''. The central class ''DOMQuery'' is documented using phpDoc-compatible API docblocks and the unit test suite offers use cases for each of the available methods.
+
+=1=Going Out in Style=1=
+
+This concludes the current chapter. You should come away from reading it with knowledge of the pros and cons of using CSS selector-based libraries and situations where their use is appropriate, specific CSS selectors and possible equivalents for them in XPath, and particular library implementations to consider.
