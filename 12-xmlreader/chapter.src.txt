@@ -1,4 +1,4 @@
-=t=XMLReader Extension=1=
+=t=XMLReader Extension=t=
 
 The previous two chapters have covered two available XML extensions that implement tree parsers. This chapter will focus on the XMLReader extension, which implements a pull parser.
 
@@ -78,7 +78,7 @@ The example below shows how to check the node type against an appropriate consta
 <code php>
 <?php
 while ($doc->read()) {
-    if ($doc->nodeType == XMLREADER::ELEMENT) {
+    if ($doc->nodeType == XMLReader::ELEMENT) {
         var_dump($doc->localName);
         var_dump($doc->value);
         var_dump($doc->hasValue);

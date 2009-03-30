@@ -1,6 +1,6 @@
-=t=SimpleXML Extension=1=
+=t=SimpleXML Extension=t=
 
-Like the DOM extension, the SimpleXML extension provides a tree parser. However, the DOM extension keeps an API fairly consistent with that of the standard on which it is based. The API offered by SimpleXML is one that most PHP developers will find to be less massive and more intuitive and easy to use compared to that of the DOM. 
+Like the DOM extension, the SimpleXML extension provides a tree parser. However, the DOM extension keeps an API fairly consistent with that of the standard on which it is based. The API offered by SimpleXML is one that most PHP developers will find to be less massive, more intuitive and easier to use compared to that of the DOM extension.
 
 SimpleXML makes use of the flexibility and versatility of PHP arrays by using them to access both individual elements from a collection with the same element name as well as element attributes. It also adds iterability to markup documents, making them simple to traverse.
 
@@ -64,13 +64,14 @@ foreach ($sxe->body->ul->li as $li) {
 foreach ($sxe->body->ul->children() as $li) {
     echo $li, PHP_EOL;
 }
+?>
 </code>
 
 When referencing a child element of the current element (via the ''body'' property of ''$sxe'' above, for example), note that the child element being accessed is also an instance of ''SimpleXMLElement''. This means it's not only possible to chain element access, but also to reference the last element in such a chain using a variable. See the first ''foreach'' loop shown above for an example of both of these.
 
 =1=Accessing Attributes=1=
 
-Where element access makes use of enumerated arrays for accessing multiple elements with the same name on the same hierarchical level, attribute access makes use of associative arrays. The example below assumes that ''$markupString'' has the sample value as in the previous example.
+Where element access makes use of enumerated arrays for accessing multiple elements with the same name on the same hierarchical level, attribute access makes use of associative arrays. The example below uses the same ''$markupString'' sample data as in the previous example.
 
 <code php>
 <?php
@@ -102,7 +103,7 @@ What the ''attributes()'' method actually returns is a ''SimpleXMLElement'' inst
 
 =1=Comparison=1=
 
-To compare an element or attribute with a string value, you must first explicitly cast it to a string. Otherwise, it will be treated as an object, which may causes type issues to the extent of emitting errors.
+To compare an element or attribute with a string value, you must first explicitly cast it to a string. Otherwise, it will be treated as an object, which may causes type issues including emitting errors.
 
 <code php>
 <?php
@@ -133,7 +134,7 @@ Like the DOM extension, SimpleXML also supports XPath. Rather than using a separ
 <code php>
 <?php
 // Returns all list items from the previous example
-$elements = $sxe->xpath('//ul[id="thelist"]/li');
+$elements = $sxe->xpath('//ul[@id="thelist"]/li');
 
 // Outputs "Foo" then "Bar"
 foreach ($elements as $li) {

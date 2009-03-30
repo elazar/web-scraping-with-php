@@ -269,7 +269,7 @@ $list = $xpath->query('//ul[li = "foobar"]');
 </code>
 
 - Square brackets are used to delimit a conditional expression.
-- Element and attribute nodes are denoted the same way within a condition as they are outside of one. That is, elements are simply referred to by element name and ''@'' is prended to attribute names.
+- Element and attribute nodes are denoted the same way within a condition as they are outside of one. That is, elements are simply referred to by element name and ''@'' is prefixed to attribute names.
 - The ''='' operator is used for equality comparisons. The converse, the ''!='' operator, checks for inequality. Other fairly standard comparison operators are also supported, including ''<'', ''<='', ''>'', and ''>=''.
 - A condition comprised only of a single number is actually short for ''position() = #'' where ''#'' is the number used. ''position'' is a function that returns the position of each individual node within the current context.
 

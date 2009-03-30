@@ -81,7 +81,7 @@ Here are the XPath equivalents along side their respective CSS counterparts. Asi
 
 Now let's move on to hierarchical selectors, which use document structure as a way to select elements, using the previous markup example.
 
-- ''body ul'' would select all ''ul'' elements that are ancestors of ''body'' elements.
+- ''body ul'' would select all ''ul'' elements that are decendants of ''body'' elements.
 - ''ul > li'' would select all ''li'' elements that are children of ''ul'' elements.
 - ''ul + img'' would select all ''img'' elements that immediately follow a ''ul'' sibling element.
 - ''ul ~ img'' would select all ''img'' elements that follow a ''ul'' sibling element. 
@@ -378,7 +378,7 @@ Form filters are just a more convenient shorthand for other expressions.
 </tr>
 </table>
 
-At this point, CSS selectors have been covered to the extent that all or a subset of those supported by a given library are explain. Now onto actual library implementations.
+At this point, CSS selectors have been covered to the extent that all or a subset of those supported by a given library are explained. Now on to actual library implementations.
 
 =1=PHP Simple HTML DOM Parser=1=
 
