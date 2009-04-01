@@ -144,8 +144,6 @@ The difference between ''evaluate'' and ''query'' is that the latter will always
 
 =1=Absolute Addressing=1=
 
-What follows is a brief introduction to the syntax of XPath expressions; it should not be considered a comprehensive reference. Concepts are explained mostly by example and in some cases are simplified to reduce the initial learning curve. For a more complete overview, see the resources listed at the end of this chapter.
-
 The process of using an XPath expression to obtain a set of nodes to which that expression applies is referred to as **addressing**. The remainder of the chapter will cover various aspects of addressing and related expression syntax.
 
 XPath expressions share several similarities with UNIX filesystem paths, both of which are used to traverse conceptual tree structures. See the example below for specific instances of this. The previous HTML example used to illustrate various concepts of markup languages is reused here to showcase XPath addressing.
@@ -269,7 +267,7 @@ $list = $xpath->query('//ul[li = "foobar"]');
 </code>
 
 - Square brackets are used to delimit a conditional expression.
-- Element and attribute nodes are denoted the same way within a condition as they are outside of one. That is, elements are simply referred to by element name and ''@'' is prefixed to attribute names.
+- Element and attribute nodes are denoted the same way within a condition as they are outside of one. That is, elements are simply referred to by element name and attribute names are prefixed with ''@''.
 - The ''='' operator is used for equality comparisons. The converse, the ''!='' operator, checks for inequality. Other fairly standard comparison operators are also supported, including ''<'', ''<='', ''>'', and ''>=''.
 - A condition comprised only of a single number is actually short for ''position() = #'' where ''#'' is the number used. ''position'' is a function that returns the position of each individual node within the current context.
 

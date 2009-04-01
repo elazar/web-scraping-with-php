@@ -22,6 +22,8 @@ $sxe = new SimpleXMLElement($filePath, null, true);
 
 The constructor's second parameter (specified as ''null'' in the second example shown above) allows for further configuration of the instance. For documents with less than valid markup, using the value ''LIBXML_NOERROR | LIBXML_NOWARNING'' for this parameter may be useful as it suppresses error and warning reports.
 
+Finally, the third parameter used in the second constructor call is set to ''true'' to indicate that ''$filePath'' is in fact a path to a file containing markup rather than the markup itself. 
+
 =1=Accessing Elements=1=
 
 Use of SimpleXML looks a bit like XPath expressions, except that the same effect is accomplished programmatically through the API rather than via formatted expressions stored in strings. Unlike XPath expressions, SimpleXML automatically assumes that element access is relative to the root node.

@@ -2,6 +2,10 @@
 
 This chapter will review several libraries that are built on top of the XML extensions described in previous chapters. These libraries provide an interface that uses CSS selector expressions to query markup documents rather than a programmatic API or XPath expressions. Don't be concerned if you aren't familiar with CSS selectors, as part of this chapter showcases basic expressions alongside their XPath equivalents.
 
+{{CSS Versions
+
+There are multiple versions of the CSS standard and supported selectors vary with each version. This chapter will cover a subset of those available in CSS3. Versions of the CSS standard supported by particular libraries are noted where available. A list of differences between the two common versions, CSS2 and CSS3, can be found at ''http://www.w3.org/TR/css3-selectors/#changesFromCSS2''.}}
+
 =1=Logistics=1=
 
 Before getting into the "how" of using CSS selector libraries, it's probably best to get the "why" (and "why not") out of the way first. It goes without saying that these libraries add a layer of complexity to applications that use them, introducing another potential point of failure. They implement expression parsers in order to take CSS selector expressions as their input and translate them into equivalent userland operations, which can have an impact on performance.
@@ -81,7 +85,7 @@ Here are the XPath equivalents along side their respective CSS counterparts. Asi
 
 Now let's move on to hierarchical selectors, which use document structure as a way to select elements, using the previous markup example.
 
-- ''body ul'' would select all ''ul'' elements that are decendants of ''body'' elements.
+- ''body ul'' would select all ''ul'' elements that are descendants of ''body'' elements.
 - ''ul > li'' would select all ''li'' elements that are children of ''ul'' elements.
 - ''ul + img'' would select all ''img'' elements that immediately follow a ''ul'' sibling element.
 - ''ul ~ img'' would select all ''img'' elements that follow a ''ul'' sibling element. 
@@ -210,7 +214,7 @@ Where basic filters are based mainly on the type of node or its position in the 
 <tr>
   <td>nodes without children</td>
   <td>''img:empty''</td>
-  <td>'//*[not(node())]''</td>
+  <td>'//img[not(node())]''</td>
 </tr>
 <tr>
   <td>nodes containing a selector match</td>
@@ -378,9 +382,11 @@ Form filters are just a more convenient shorthand for other expressions.
 </tr>
 </table>
 
-At this point, CSS selectors have been covered to the extent that all or a subset of those supported by a given library are explained. Now on to actual library implementations.
+=1=Libraries=1=
 
-=1=PHP Simple HTML DOM Parser=1=
+At this point, CSS selectors have been covered to the extent that all or a subset of those supported by a given library are explained. This section will review some library implementations that are available, where to find them, what feature set they support, and some advantages and disadvantages of using them.
+
+=2=PHP Simple HTML DOM Parser=2=
 
 The major distinguishing trait of this library is its requirements: PHP 5 and the PCRE extension (which is pretty standard in most PHP distributions). It has no external dependencies on or associations with other libraries or extensions, not even the standard XML extensions in PHP.
 
@@ -388,17 +394,17 @@ The implication of this is that all parsing is handled in PHP itself, which make
 
 The documentation for this library is fairly good and can be found at ''http://simplehtmldom.sourceforge.net/manual.htm''. Its main web site, which includes a link to download the library, is available at ''http://simplehtmldom.sourceforge.net''. It is licensed under the MIT License.
 
-=1=Zend_Dom_Query=1=
+=2=Zend_Dom_Query=2=
 
 One of the components of Zend Framework, this library was originally created to provide a means for integration testing of applications based on the framework. However, it can function independently and apart from the framework and provides the functionality needed in the analysis phase of web scraping. Officially, Zend Framework requires PHP 5.2.4 or higher.
 
-Zend_Dom_Query makes extensive use of the DOM extension. It supports XPath through use of the DOM extension's DOMXPath class and handles CSS expressions by transforming them into equivalent XPath expressions. Note that only CSS 2 is supported, which excludes non-attribute filters. A list of differences between CSS2 and CSS3 can be found at ''http://www.w3.org/TR/css3-selectors/#changesFromCSS2''.
+Zend_Dom_Query makes extensive use of the DOM extension. It supports XPath through use of the DOM extension's DOMXPath class and handles CSS expressions by transforming them into equivalent XPath expressions. Note that only CSS 2 is supported, which excludes non-attribute filters.
 
 Note that Zend_Dom_Query offers no retrieval functionality. All methods for introducing documents into it require that those documents be in string formbeforehand. If you are already using Zend Framework, a readily available option for retrieval is Zend_Http_Client, which is also discussed in this book.
 
 Documentation for Zend_Dom_Query can be found at ''http://framework.zend.com/manual/en/zend.dom.query.html''. At this time, there is no officially supported method of downloading only the Zend_Dom package. The entire framework can be downloaded from ''http://framework.zend.com/download/current/'' and the directory for the Zend_Dom package can be extracted from it. An unofficial method of downloading individual packages can be found at ''http://epic.codeutopia.net/pack/library/1.7''. Framework components are licensed under the New BSD License.
 
-=1=phpQuery=1=
+=2=phpQuery=2=
 
 phpQuery is based on jQuery and is fairly similar to it insofar as its runtime environment being the server (as opposed to the client) will allow. It requires PHP 5.2 and its DOM extension as well as the Zend_Http_Client and Zend_Json components from Zend Framework, which are bundled but can be substituted with the same components from a local Zend Framework installation.
 
@@ -406,7 +412,7 @@ CSS support is limited to a subset of CSS3. Most jQuery features are supported i
 
 Documentation and download links are available from ''http://code.google.com/p/phpquery/''. It is licensed under the MIT License.
 
-=1=DOMQuery=1=
+=2=DOMQuery=2=
 
 This library is actually a project of my own. While still in alpha at the time of this writing, it is fairly functional and includes a full unit test suite. Like some of the other libraries mentioned in this chapter, it requires PHP 5 and makes heavy use of the DOM extension.
 
