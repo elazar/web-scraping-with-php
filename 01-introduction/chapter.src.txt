@@ -56,6 +56,8 @@ Chapter 9 details use of the tidy extension for correcting issues with retrieved
 
 Chapters 10-12 review various XML extensions for PHP, compare and contrast the two classes of XML parsers, and provide a brief introduction to XPath.
 
+Chapter 13 is a study of CSS selectors, comparisons between them and XPath expressions, and information on available libraries for using them to query markup documents.
+
 =1=OK, I've done my homework. How do I get started with web scraping?=1=
 
 Glad you asked. To answer that question, let's move on to the next chapter.
