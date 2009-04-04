@@ -103,6 +103,10 @@ What the ''attributes()'' method actually returns is a ''SimpleXMLElement'' inst
 </ul>
 </code>
 
+{{A Debugging Bug
+
+Bug #44973, which affects the SimpleXML extension, is reported to be present in PHP 5.2.6 and may be present in other versions as well. The bug is exposed when an attempt is made to output a node accessed via a SimpleXMLElement instance using ''echo'', ''print_r()'', ''var_dump()'', and other similar functions. If the node has both attributes and a text value, the attributes will not be shown in the output of these functions. This does not mean that attribute values are not accessible in this situation; they simply can't be output in this fashion unless referenced directly. More information on this is available at ''http://bugs.php.net/bug.php?id=44973''.}}
+
 =1=Comparison=1=
 
 To compare an element or attribute with a string value, you must first explicitly cast it to a string. Otherwise, it will be treated as an object, which may causes type issues including emitting errors.
