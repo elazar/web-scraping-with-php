@@ -1,0 +1,303 @@
+=1=PCRE Extension=1=
+
+There are some instances where markup documents may be so hideously malformed that they're simply not usable by an XML extension. Other times, you may want to have a way to check the data you've extracted to ensure that it's what you expect. Changes to the structure of markup documents may be significant, to the point where your CSS or XPath queries return no results. They may also be small and subtle, such that while you do get query results, they contain less or different data than intended.
+
+While either of these tasks could be done with basic string handling functions and comparison operators, in most cases the implementation would prove to be messy and unreliable. **Regular expressions** provide a syntax consisting of **meta-characters** whereby patterns within strings are expressed flexibly and concisely. This chapter will deal with regular expressions as they relate to the Perl-Compatible Regular Expression (PCRE) PHP extension in particular.
+
+{{POSIX Extended Regular Expressions
+
+Many PHP developers will cut their teeth on regular expressions using the POSIX regular expression extension, also called the ereg extension. The functions from this extension are being deprecated in PHP 5.3 in favor of those in the PCRE extension, which are faster and provide a more powerful feature set. Aside from differences in syntax for some special character ranges, most ereg expressions require only the addition of expression delimiters to work with preg functions.}}
+
+=1=Pattern Basics=1=
+
+Let's start with something simple: detection of a substring anywhere within a string.
+
+<code php>
+<?php
+// Substring detection with a basic string function
+$present = (strpos($string, 'foo') !== false);
+
+// Same with a PCRE function
+$present = (preg_match('/foo/', $string) == 1);
+?>
+</code>
+
+Notice that the pattern in the ''preg_match()'' call is fairly similar to the string used in the ''strpos()'' call. In the former, ''/'' is used on either side of the pattern to indicate its beginning and end. The first character in the pattern string is considered to be the **pattern delimiter** and can be any character you specify. When choosing what you want to use for this character (''/'' is the most common choice), bear in mind that you will have to escape it (covered in the Escaping section later) if you use it within the pattern. This will make more sense a little later in the chapter.
+
+A difference between the two functions used in this example is that ''strpos()'' returns the location of the substring within the string beginning at 0 or ''false'' if the substring is not contained within the string. This requires the use of the ''==='' operator to tell the difference between the substring being matched at the beginning of the string or not at all. By contrast, ''preg_match()'' returns the number of matches it found. This will be either 0 or 1 since ''preg_match()'' stops searching once it finds a match.
+
+=1=Beginning or End=1=
+
+You may want to check for the presence of a pattern at the beginning or end of a string rather than simply checking to see if the pattern is contained anywhere within the string.
+
+<code php>
+<?php
+// Beginning of the string with a basic string function
+$start = (strpos($string, 'foo') === 0);
+
+// Same with a PCRE function
+$start = (preg_match('/^foo/', $string) == 1);
+
+// End of the string with basic string functions
+$end = (substr($string, - strlen('foo')) == 'foo');
+
+// Same with a PCRE function
+$end = (preg_match('/foo$/', $string) == 1);
+
+// Means the same as an exact match with the string
+$equal = (preg_match('/^foo$/', $string) == 1);
+?>
+</code>
+
+- ''^'' (also called the circumflex character) is used at the beginning of an expression within a pattern to indicate that matching should start at the beginning of a string.
+- Likewise, ''$'' is used to indicate that matching of an expression within a pattern should stop at the end of a string.
+- When used together, ''^'' and ''$'' can indicate that the entirety of ''$string'' matches the pattern exactly. 
+
+=1=One or the Other=1=
+
+It's possible to check for multiple expressions simultaneously in a single pattern, also called **alternation**, using the ''|'' meta-character.
+
+<code php>
+<?php
+// Matches 'foo' or 'bar' or 'baz' anywhere
+$matches = (preg_match('/foo|bar|baz/', $string) == 1);
+?>
+</code>
+
+Note that the ''^'' and ''$'' are not implicitly applied to all expressions in an alternation; they must be used explicitly for each expression.
+
+<code php>
+<?php
+// $result == 1
+$result = preg_match('/^foo|bar/', 'abar');
+
+// $result == 0
+$result = preg_match('/^foo|^bar/', 'abar');
+?>
+</code>
+
+The first example returns ''1'' because '''abar''' contains '''bar''', since ''^'' is not applied to that expression in the pattern. The second example does apply ''^'' to '''bar''' and, since '''abar''' begins with neither '''foo''' nor '''bar''', it returns ''0''.
+
+=1=Maybe, Maybe Not=1=
+
+Part of a pattern may or may not be present, or may be repeated a number of times. This is referred to as **repetition** and involves using meta-characters collectively referred to as **quantifiers**.
+
+<code php>
+<?php
+// Matches 'a' if present
+$matches = (preg_match('/a?/', $string) == 1);
+
+// Matches 'a' 0 or more times, however many that may be
+$matches = (preg_match('/a*/', $string) == 1);
+
+// Matches 'a' 1 or more times, however many that may be
+$matches = (preg_match('/a+/', $string) == 1);
+
+// Matches 'a' 0 or 1 times, same as ?
+$matches = (preg_match('/a{0,1}/', $string) == 1);
+
+// Matches 'a' 0 or more times, same as * 
+$matches = (preg_match('/a{0,}/', $string) == 1);
+
+// Matches 'a' 1 or more times, same as + 
+$matches = (preg_match('/a{1,}/', $string) == 1);
+
+// Matches 'a' exactly 2 times
+$matches = (preg_match('/a{2}/', $string) == 1);
+
+?>
+</code>
+
+Note that any use of curly brackets that is not of the form ''{X}'', ''{X,}'', or ''{X,Y}'' will be treated as a literal string within the pattern.
+
+=1=Subpatterns=1=
+
+You'll notice in the examples from the previous section that only a single character was used. This is because the concept of **subpatterns** hadn't been introduced yet. To understand these, it's best to look an example that doesn't use them in order to understand the effect they have on how the pattern matches.
+
+<code php>
+<?php
+// Matches 'a' follow by one or more instances of 'b'
+$matches = (preg_match('/ab+/', $string) == 1);
+?>
+</code>
+
+Without subpatterns there would be no way to match, for example, one or more instances of the string '''ab'''. Subpatterns solve this pattern by allowing individuals parts of a pattern to be grouped using parentheses.
+
+<code php>
+<?php
+// Matches 'ab' one or more times
+$matches = (preg_match('/(ab)+/', $string) == 1);
+
+// Matches 'foo' or 'foobar'
+$matches = (preg_match('/foo(bar)?/', $string) == 1);
+
+// Matches 'ab' or 'ac'
+$matches = (preg_match('/a(b|c)/', $string) == 1);
+
+// Matches 'ab', 'ac', 'abb', 'abc', 'acb', 'acc', etc.
+$matches = (preg_match('/a(b|c)+/', $string) == 1);
+?>
+</code>
+
+=1=Matching=1=
+
+Subpatterns do a bit more than let you define parts of a pattern to which alternation or repetition apply. When a match is found, it's possible to obtain not only the substring from the original string that matched the entire pattern, but also substrings that were matched by subpatterns. 
+
+<code php>
+<?php
+if (preg_match('/foo(bar)?(baz)?/', $string, $match) == 1) {
+    print_r($match);
+}
+?>
+</code>
+
+The third parameter to ''preg_match()'', ''$match'', will be set to an array of match data if a match is found. That array will contain at least one element: the entire substring that matched the pattern. Any elements that follow will be subpattern matches with an index matching that subpattern's position within the pattern. That is, the first subpattern will have the index 1, the second subpattern will have the index 2, and so on.
+
+If a pattern is conditional (i.e. uses ''?'') and not present, it will either have an empty element value in the array or no array element at all.
+
+<code php>
+<?php
+if (preg_match('/foo(bar)?/', 'foo', $match) == 1) {
+    // $match == array('foo');
+}
+
+if (preg_match('/foo(bar)?(baz)?/', 'foobaz', $match) == 1) {
+    // $match == array('foo', '', 'baz');
+}
+?>
+</code>
+
+- In the first example, the ''(bar)?'' subpattern ends the entire pattern and is not matched. Thus, it has no entry in ''$match''.
+- In the second example, the ''(bar)?'' subpattern does not entire the entire pattern and is not matched. This, it has an empty entry in ''$match''.
+
+Subpatterns can also contain other subpatterns. 
+
+<code php>
+<?php
+if (preg_match('/foo(ba(r|z))?/', 'foobar', $match) == 1) {
+    // $match == array('foobar', 'bar', 'r');
+}
+?>
+</code>
+
+Aside from passing ''$match'' to ''print_r()'' or a similar function, an easy way to tell what a subpattern's position will be in ''$match'' is to count the number of opening parentheses in the pattern from left to right until you reach the subpattern you're looking for.
+
+=1=Escaping=1=
+
+There may be instances where you want to include literal characters in patterns that are usually interpreted as meta-characters. This can be accomplished via a ''\'' meta-character. Because this is also used as an escape character in PHP strings, it must be escaped a second time when used.
+
+<code php>
+<?php
+// Matches literal [
+$matches = (preg_match('/\\[/', $string) == 1);
+
+// Matches literal \
+$matches = (preg_match('/\\\\/', $string) == 1);
+
+// Matches expression delimiter /
+$matches = (preg_match('/\\//', $string) == 1); 
+
+// Matches any of the standard escape sequences \r, \n, or \t
+$matches = (preg_match('/\\r|\\n|\\t/', $string) == 1); 
+
+// Also matches any of the standard escape sequences \r, \n, or \t
+$matches = (preg_match("/\r|\n|\t/", $string) == 1); 
+?>
+</code>
+
+Note in the last example that, because double-quoted strings are used, no escaping of ''\'' is required. Conversely, escaping is required when single-quoted strings are used.
+
+=1=One For All=1=
+
+There are three ways to match a single character that could be one of several characters.
+
+The first way involves using the ''.'' meta-character, which will match any character except a line feed (''"\n"'') without use of modifiers (which will be covered later). This can be used with repetition and such just like any other character.
+
+The second way requires using special escape sequences that represent a range of characters. Aside from the escape sequences mentioned in the previous section's examples, here are some that are commonly used.
+
+- ''\d'': a digit, 0 through 9.
+- ''\h'': a horizontal whitespace character, such as a space or a tab.
+- ''\v'': a vertical whitespace character, such as a carriage return or line feed.
+- ''\s'': any whitespace character, the equivalent of all characters represented by ''\h'' and ''\v''.
+- ''\w'': any letter or digit or an underscore.
+
+Each of these escape sequences has a complement.
+
+- ''\D'': a non-digit character.
+- ''\H'': a non-horizontal whitespace character.
+- ''\V'': a non-vertical whitespace character.
+- ''\S'': a non-whitespace character.
+- ''\W'': a character that is not a letter, digit, or underscore.
+
+The third and final way involves using **character ranges**, which are characters within square brackets (''['' and '']''). A character range represents a single character, but like normal single characters they can have repetition applied to them.
+
+<code php>
+<?php
+// Matches the same as \d
+$matches = (preg_match('/[0-9]/', $string) == 1);
+
+// Matches the same as \w
+$matches = (preg_match('/[a-zA-Z0-9_]/', $string) == 1);
+?>
+</code>
+
+Ranges are respective to ASCII (American Standard Code for Information Interchange). In other words, the ASCII value for the beginning character must precede the ASCII value for the ending character. Otherwise, the warning "Warning: preg_match(): Compilation failed: range out of order in character class at offse" is emitted.
+
+Within square brackets, single characters and special ranges are simply listed side by side with no delimiter, as shown in the second example above. Additionally, the escape sequences mentioned earlier can be used both inside and outside square brackets.
+
+{{ASCII Ranges 
+
+For an excellent ASCII lookup table, see ''http://www.asciitable.com''.}}
+
+There are two other noteworthy points about character ranges, as illustrated in the examples below.
+
+<code php>
+<?php
+// Using a literal - in a character range is done like so
+$matches = (preg_match('/[\\-]/', $string) == 1);
+
+// Matches any character that is not 'a'
+$matches = (preg_match('/[^a]/', $string) == 1);
+
+// Using a literal ^ in a character range is done like so
+$matches = (preg_match('/[\\^]/', $string) == 1);
+$matches = (preg_match('/[a^]/', $string) == 1);
+?>
+</code>
+
+- To use a literal ''-'' character in a character range, escape it in the same manner in which other metacharacters are escaped.
+- To negate a character range, use ''^'' as the first character in that character range. (Yes, this can be confusing since ''^'' is also used to denote the beginning of a line or entire string when it is not used inside a character range.) Note that negation applies to all characters in the range. In other words, a negated character range means "any character that is not any of these characters."
+- To use a literal ''^'' character in a character range, either escape it in the same manner in which other metacharacters are escaped or do not use it as the first or only character in the range.
+
+{{ctype Extension
+
+Some simple patterns have equivalent functions available in the ctype library. These generally perform better and should be used over PCRE when appropriate. See http://php.net/ctype for more information on the ctype extension and the functions it offers.}}
+
+=1=Modifiers=1=
+
+The reason for having pattern delimiters to denote the start and end of a pattern is that the pattern precedes **modifiers** that affect the matching behavior of meta-characters. Here are a few modifiers that may prove useful in web scraping applications.
+
+- i: Any letters in the pattern will match both uppercase and lowercase regardless of the case of the letter used in the pattern.
+- m: ''^'' and ''$'' will match the beginning and ends of lines within the string (delimited by line feed characters) rather than the beginning and end of the entire string.
+- s: (lowercase) ''.'' will match line feeds, which it does not by default.
+- S: (uppercase) Spends additional time analyzing a pattern to speed up subsequent matches with that pattern. Useful for patterns used multiple times.
+- U: By default, the quantifiers ''*'' and ''+'' behave in a manner referred to as "greedy." That is, they match as many characters as possible rather than as few as possible. This modifier forces the latter behavior. 
+- u: Forces pattern strings to be treated as UTF-8 encoded strings.
+
+The example below matches because the ''i'' modifier is used, which means that the pattern matches '''a''' and '''A'''.
+
+<code php>
+<?php
+$matches = (preg_match('/a/i', 'A') == 1);
+?>
+</code>
+
+=1=Match Point=1=
+
+This chapter has covered the most essential aspects of regular expressions that apply to validation of scraped data. There are more advanced aspects of regular expressions that may be useful in other areas. Further review of the PCRE section of the PHP manual is encouraged.
+
+{{PCRE Resources
+
+For pattern modifiers, see ''http://php.net/manual/en/reference.pcre.pattern.modifiers.php''.
+For pattern syntax, see ''http://php.net/manual/en/regexp.reference.php''.
+For an excellent book on regular expressions, see "Mastering Regular Expressions," ISBN 0596528124.}}
