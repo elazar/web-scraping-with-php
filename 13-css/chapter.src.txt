@@ -402,7 +402,7 @@ Zend_Dom_Query makes extensive use of the DOM extension. It supports XPath throu
 
 Note that Zend_Dom_Query offers no retrieval functionality. All methods for introducing documents into it require that those documents be in string formbeforehand. If you are already using Zend Framework, a readily available option for retrieval is Zend_Http_Client, which is also discussed in this book.
 
-Documentation for Zend_Dom_Query can be found at ''http://framework.zend.com/manual/en/zend.dom.query.html''. At this time, there is no officially supported method of downloading only the Zend_Dom package. The entire framework can be downloaded from ''http://framework.zend.com/download/current/'' and the directory for the Zend_Dom package can be extracted from it. An unofficial method of downloading individual packages can be found at ''http://epic.codeutopia.net/pack/library/1.7''. Framework components are licensed under the New BSD License.
+Documentation for Zend_Dom_Query can be found at ''http://framework.zend.com/manual/en/zend.dom.query.html''. At this time, there is no officially supported method of downloading only the Zend_Dom package. The entire framework can be downloaded from ''http://framework.zend.com/download/current/'' and the directory for the Zend_Dom package can be extracted from it. An unofficial method of downloading individual packages can be found at ''http://epic.codeutopia.net/pack/''. Framework components are licensed under the New BSD License.
 
 =2=phpQuery=2=
 
