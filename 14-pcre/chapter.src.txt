@@ -1,4 +1,4 @@
-=1=PCRE Extension=1=
+=t=PCRE Extension=t=
 
 There are some instances where markup documents may be so hideously malformed that they're simply not usable by an XML extension. Other times, you may want to have a way to check the data you've extracted to ensure that it's what you expect. Changes to the structure of markup documents may be significant, to the point where your CSS or XPath queries return no results. They may also be small and subtle, such that while you do get query results, they contain less or different data than intended.
 
