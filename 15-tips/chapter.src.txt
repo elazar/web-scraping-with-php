@@ -1,0 +1,114 @@
+=t=Tips and Tricks=t=
+
+Chapters preceding this one are intended to lay out pertinent information about the skills required to build a web scraping application. This chapter focuses more on a collection of practical applications and methodologies for that material. It is meant to tie all previously covered material together and round out the book as a whole. Some topics covered here will be specific to a particular class of web scraping applications, some will be generally applicable, and most will assume that the application is intended for long-term use. Hopefully they will all illustrate what matters to consider when designing your application.
+
+=1=Batch Jobs=1=
+
+Web scraping applications intended for long-term use generally function in one of two ways: real-time or batch.
+
+A web scraping application implemented using the real-time approach will receive a request and send a request out to the target application being scraped in order to fulfill the original request. There are two advantages to this. First, any data pulled from the target application will be current. Second, any data pushed to the target application will be reflected on that site in the same amount of time it would take if the data had been pushed directly to the target application. This approach has the disadvantage of increasing the response time of the web scraping application, since the client essentially has to wait for two requests to complete for every one request that would normally be made to the target application.
+
+The batch approach is based on synchronization. For read operations, data is updated on a regular interval. For write operations, changes are stored locally and then pushed out in batches (hence the name) to the target application, also on a regular interval. The pros and cons to this approach are the complement of those from the real-time approach: updates will not be real-time, but the web scraping application's response time will not be increased. It is of course possible to use a batch approach with a relatively low interval in order to approximate real-time while gaining the benefits of the batch approach.
+
+The selection of an approach depends on the requirements of the web scraping application. In general, if real-time updates on either the web scraping application or target application are not required, the batch approach is preferred to maintain a high level of performance.
+
+=1=Availability=1=
+
+Regardless of whether a web scraping application takes a real-time or batch approach, it should treat the remote service as as potential point of failure and account for cases where it does not return a response. Once a tested web scraping application goes into production, common causes for this are either service downtime or modification. Symptoms of these include connection timeouts and responses with a status code above the 2xx range.
+
+An advantage of the batch approach in this situation is that the web scraping application's front-facing interface can remain unaffected. Cached data can be used or updates can be stored locally and synchronization can be initiated once the service becomes available again or the web scraping application has been fixed to account for changes in the remote service.
+
+=1=Parallel Processing=1=
+
+Two of the HTTP client libraries covered, cURL and pecl_http, support running requests in parallel using a single connection. While the same feature cannot be replicated exactly using other libraries, it is possible to run multiple requests on separate connections using processes that are executed in parallel.
+
+Even if you are using a library supporting connection pooling, this technique is useful for situations when multiple hosts are being scraped since each will require a separate connection anyway. In doing so, requests sent to a host with a lower response rate will not block those sent to another more responsive host.
+
+See below for an example that maintains a particular maximum number of processes until the job being executed in parallel is completed.
+
+<code php>
+<?php
+// Maximum number of child processes to fork off
+$children_max = 10;
+
+// Counter for current number of child processes
+$children_count = 0;
+
+// Whether the job being distributed to children is complete
+$job_finished = false;
+
+// Temporary variable for the status of a terminated child process
+$child_status = null;
+
+// Process identifier, initialized so the parent case executes
+$pid = 1;
+
+while (!$job_finished) {
+    if ($pid == -1) {
+        trigger_error('Unable to fork process', E_USER_ERROR);
+    } elseif ($pid) {
+        // Parent process
+
+        // Check for more work and toggle $job_finished if needed
+
+        // Fork another child
+        $children_count++;
+        $pid = pcntl_fork();
+
+        // Wait to fork more children if the max is reached
+        if ($children_count == $children_max) {
+            pcntl_wait($child_status);
+            $children_count--;
+        }
+    } else {
+        // Child process
+        // Perform a unit of work
+        exit;
+    }
+}
+?>
+</code>
+
+=1=Crawlers=1=
+
+Some web scraping applications are intended to serve as crawlers to index content from web sites. Like all other web scraping applications, the work they perform can be divided into two categories: retrieval and analysis. The parallel processing approach is applicable here because both categories of work serve to populate each other's work queue.
+
+The retrieval process is given one or more initial documents to retrieve. Each time a document is retrieved, it becomes a job for the analysis process, which scrapes the markup searching for links (''a'' elements) to other documents, which may be restricted by one or more relevancy factors. Once analysis of a document is complete, addresses to any currently unretrieved documents are then fed back to the retrieval process.
+
+This situation of mutual supply will hypothetically be sustained until no documents are found that are unindexed or considered to be relevant. At that point, the process can be restarted with the retrieval process using appropriate request headers to check for document updates and feeding documents to the analysis process where updates are found.
+
+=1=Forms=1=
+
+Some web scraping applications must push data to the target application. This is generally accomplished using HTTP POST requests that simulate the submission of HTML forms. Before such requests can be sent, however, there are a few events that generally have to transpire. First, if the web scraping application is intended to be presented to a user, a form that is at least somewhat similar must be presented to that user. Next, data submitted via that form by the user should be validated to ensure that it is likely to be accepted by the target application.
+
+The applicability of this technique will vary by project depending on requirements and how forms are structured. It involves scraping the markup of the form in the target application and using the scraped data to generate something like a metadata file or PHP source code file that can be dropped directly into the web scraping application project. This can be useful to expedite development efforts for target applications that have multiple forms or complex forms for which POST requests must be simulated.
+
+For the purposes of formulating a POST request, you will want to query for elements with the names ''input'', ''select'', ''textarea'', or possibly ''button'' that have a ''name'' attribute. Beyond that, here are a few element-specific considerations to take into account.
+
+- ''input'' elements with a ''type'' attribute value of ''checkbox'' or ''radio'' that are not checked when the form on the web scraping application side is submitted should not have their ''value'' attribute values included when the POST request is eventually made to the target application.
+- ''select'' elements may be capable of having multiple values depending on whether or not the ''multiple'' attribute is set. How this is expressed in the POST request can depend on the platform on which the target application is running. The best way to determine this is to submit the form on the target application via a client that can show you the underlying POST request being made.
+- ''input'' elements that have a ''maxlength'' attribute are restricted to values of that length or less. Likewise, ''select'' elements are restricted to values in the ''value'' attributes of their contained ''option'' child elements. Both should be considered when validating user-submitted data.
+
+=1=Web Services=1=
+
+Web scraping applications are often built because the target application offers no web service or data formatted for automated consumption. However, some of these sites do eventually come to offer a web service after the web scraping application has already been built. As such, it's important to keep this potential eventuality in mind during the design phase.
+
+The introduction of a web service will not negate previously described concerns regarding retrieval. Latency can still prove to be an issue for an application that attempts to access either the target application or a corresponding web service in real-time. Ideally, complexity will be reduced and performanced increased in the analysis process when switching from a web scraping application to an API.
+
+However, both areas of code will likely need to be replaced if an API offering does materialize. As such, it's important to design an API that approximates a hypothetical web service offering as closely as possible and centralizes logic that will need to be replaced in that event. By doing so, existing local application logic that uses the existing API will require little or no change.
+
+Legalities aside (see Appendix A for more on those), there are reasons to consider maintaining an existing web scraping application over a new web service offering. These can include web service data offerings being limited or incomplete by comparison or uptime of the web service being below an acceptable tolerance. In the former case, web scraping logic can be replaced with web service calls where the two data offerings overlap for increased data reliability. In the latter case, the web scraping logic can conduct web service calls when the service is available and use cached data or store data updates locally until the service becomes available again.
+
+=1=Testing=1=
+
+As important as unit testing is to quality assurance for an application, it's all the more important to a web scraping application because it's reliant on its target to remain unchanged. Queries of markup documents must be checked to assert that they produce predictable results and data extracted from those markup documents must be validated to ensure that it is consistent with expectations. In the case of real-time applications, HTTP responses must also be checked to ensure that the target application is accessible and has not changed drastically such that resources are no longer available at their original locations. 
+
+During development, it's an advisable to download local copies of documents to be scraped and include them as part of the unit test suite as it's development. Additionally, the test suite should include two working modes: local and remote. The former case would perform tests on the aforementioned local document copies while the latter would download the documents from the target site in real-time. In the event that any areas of the web scraping application stop functioning as expected, contrasting the results of these two working modes can be very helpful in determining the cause of the issue.
+
+PHPUnit is among the most popular of PHP unit testing frameworks available. See ''http://phpunit.de'' for more information. Among its many features is the option to output test results to a file in XML format. This feature and others similar to it in both PHPUnit and other unit testing frameworks is very useful in producing results that can be ported to another data medium and made accessible to the web scraping application itself. This facilitates the ability to temporarily restrict or otherwise disable functionality in that application should tests relevant to said functionality fail.
+
+The bottom line is this: debugging a web application can be like trying to shoot a moving target. It's important to make localizing the cause of an issue as easy as possible in order to minimize the turn-around time to updating the web scraping application to accommodate for it. Test failures should alert developers and lock down any sensitive application areas to prevent erroneous transmission, corruption, or deletion of data.
+
+=1=That's All Folks=1=
+
+Thank you for reading this book. Hopefully you've enjoyed it and learned new things along the way or at least been given food for thought. Ideally, reading this will have far-reaching effects on how you build web scraping applications in the future and it will be one of the books you refer back to time and time again. Beyond this book, what remains to be learned is learned by doing. So, go forth and scrape!
