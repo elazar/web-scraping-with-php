@@ -53,6 +53,10 @@ $equal = (preg_match('/^foo$/', $string) == 1);
 - Likewise, ''$'' is used to indicate that matching of an expression within a pattern should stop at the end of a string.
 - When used together, ''^'' and ''$'' can indicate that the entirety of ''$string'' matches the pattern exactly. 
 
+{{Start of String or Line
+
+It's important to note that the behavior of these two operators can vary. By default, they match the beginning and end of ''$string''. If the multi-line modifier is used, they match the beginning and end of each line in ''$string'' instead. This will be covered in more detail later in the Modifiers section of this chapter.}}
+
 =1=One or the Other=1=
 
 It's possible to check for multiple expressions simultaneously in a single pattern, also called **alternation**, using the ''|'' meta-character.
@@ -84,7 +88,7 @@ Part of a pattern may or may not be present, or may be repeated a number of time
 
 <code php>
 <?php
-// Matches 'a' if present
+// Matches 'a' 0 times or 1 time if present
 $matches = (preg_match('/a?/', $string) == 1);
 
 // Matches 'a' 0 or more times, however many that may be
@@ -93,7 +97,7 @@ $matches = (preg_match('/a*/', $string) == 1);
 // Matches 'a' 1 or more times, however many that may be
 $matches = (preg_match('/a+/', $string) == 1);
 
-// Matches 'a' 0 or 1 times, same as ?
+// Matches 'a' 0 times or 1 time if present, same as ?
 $matches = (preg_match('/a{0,1}/', $string) == 1);
 
 // Matches 'a' 0 or more times, same as * 
@@ -168,7 +172,7 @@ if (preg_match('/foo(bar)?(baz)?/', 'foobaz', $match) == 1) {
 </code>
 
 - In the first example, the ''(bar)?'' subpattern ends the entire pattern and is not matched. Thus, it has no entry in ''$match''.
-- In the second example, the ''(bar)?'' subpattern does not entire the entire pattern and is not matched. This, it has an empty entry in ''$match''.
+- In the second example, the ''(bar)?'' subpattern does not end the entire pattern and is not matched. This, it has an empty entry in ''$match''.
 
 Subpatterns can also contain other subpatterns. 
 
@@ -184,28 +188,29 @@ Aside from passing ''$match'' to ''print_r()'' or a similar function, an easy wa
 
 =1=Escaping=1=
 
-There may be instances where you want to include literal characters in patterns that are usually interpreted as meta-characters. This can be accomplished via a ''\'' meta-character. Because this is also used as an escape character in PHP strings, it must be escaped a second time when used.
+There may be instances where you want to include literal characters in patterns that are usually interpreted as meta-characters. This can be accomplished via a ''\'' meta-character.
 
 <code php>
 <?php
 // Matches literal [
-$matches = (preg_match('/\\[/', $string) == 1);
+$matches = (preg_match('/\[/', $string) == 1);
 
 // Matches literal \
 $matches = (preg_match('/\\\\/', $string) == 1);
 
 // Matches expression delimiter /
-$matches = (preg_match('/\\//', $string) == 1); 
+$matches = (preg_match('/\//', $string) == 1); 
 
 // Matches any of the standard escape sequences \r, \n, or \t
-$matches = (preg_match('/\\r|\\n|\\t/', $string) == 1); 
-
-// Also matches any of the standard escape sequences \r, \n, or \t
-$matches = (preg_match("/\r|\n|\t/", $string) == 1); 
+$matches = (preg_match('/\r|\n|\t/', $string) == 1); 
 ?>
 </code>
 
-Note in the last example that, because double-quoted strings are used, no escaping of ''\'' is required. Conversely, escaping is required when single-quoted strings are used.
+Note that it is necessary to double-escape ''\'' in the second example because the string '''\\''' is interpreted to be a single backslash by PHP whether or not it is used in a regular expression. In other cases, no escaping of ''\'' is needed for the escape sequence to be interpreted properly. 
+
+{{Double Escaping
+
+For more information on the reasoning behind the double-escape example in this section, see ''http://php.net/manual/en/language.types.string.php#language.types.string'' and the Backslash section of ''http://us2.php.net/manual/en/regexp.reference.php''.}}
 
 =1=One For All=1=
 
@@ -253,8 +258,8 @@ There are two other noteworthy points about character ranges, as illustrated in 
 
 <code php>
 <?php
-// Using a literal - in a character range is done like so
-$matches = (preg_match('/[\\-]/', $string) == 1);
+// Using a literal ] in a character range is done like so
+$matches = (preg_match('/[\]]/', $string) == 1);
 
 // Matches any character that is not 'a'
 $matches = (preg_match('/[^a]/', $string) == 1);
@@ -265,7 +270,7 @@ $matches = (preg_match('/[a^]/', $string) == 1);
 ?>
 </code>
 
-- To use a literal ''-'' character in a character range, escape it in the same manner in which other metacharacters are escaped.
+- To use a literal '']'' character in a character range, escape it in the same manner in which other metacharacters are escaped.
 - To negate a character range, use ''^'' as the first character in that character range. (Yes, this can be confusing since ''^'' is also used to denote the beginning of a line or entire string when it is not used inside a character range.) Note that negation applies to all characters in the range. In other words, a negated character range means "any character that is not any of these characters."
 - To use a literal ''^'' character in a character range, either escape it in the same manner in which other metacharacters are escaped or do not use it as the first or only character in the range.
 
