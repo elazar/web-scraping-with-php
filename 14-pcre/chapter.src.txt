@@ -241,7 +241,7 @@ $matches = (preg_match('/[a-zA-Z0-9_]/', $string) == 1);
 ?>
 </code>
 
-Ranges are respective to ASCII (American Standard Code for Information Interchange). In other words, the ASCII value for the beginning character must precede the ASCII value for the ending character. Otherwise, the warning "Warning: preg_match(): Compilation failed: range out of order in character class at offse" is emitted.
+Ranges are respective to ASCII (American Standard Code for Information Interchange). In other words, the ASCII value for the beginning character must precede the ASCII value for the ending character. Otherwise, the warning "Warning: preg_match(): Compilation failed: range out of order in character class at offset //n//" is emitted, where n is character offset in the regular expression.
 
 Within square brackets, single characters and special ranges are simply listed side by side with no delimiter, as shown in the second example above. Additionally, the escape sequences mentioned earlier can be used both inside and outside square brackets.
 
