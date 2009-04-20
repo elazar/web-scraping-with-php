@@ -1,0 +1,55 @@
+=t=Appendix B=t=
+
+When a PHP script is executed using the CLI SAPI (i.e. from a command line), that instance of execution exists as a process in the local operating system. The Process Control (pcntl) extension makes it possible for PHP scripts to perform what is called a process **fork**. This entails the original PHP process (then called the **parent process**) creating a copy of itself (appropriately called the **child process**) that includes everything from the data associated with the process to the current point of execution following the fork instruction. 
+
+Once the fork completes, both processes exist and execution independently of each other. The parent process can fork itself multiple times in succession and retains a limited awareness of its child processes. In particular, it is notified when any given child process terminates.
+
+Because each child process is a copy of its parent process, the number of child processes that can be forked is limited by the hardware resources of the local system. CPU will merely limit the speed at which all child processes can complete. Memory, however, can become a bottleneck if the local system's RAM is exceeded and it has to resort to using swap space for storage.
+
+This restriction creates the desire to fork as many processes as possible to complete a job in parallel without hitting any resource limits. This is generally achieved by using a predetermined cap on the number of processes to fork. Once any given child processes completes, however, it may be desirable to create a new child process in its place to complete another unit of work. An implementation of this is presented in the example below. 
+
+<code php>
+<?php
+// Maximum number of child processes to fork
+$children_max = 10;
+
+// Counter for current number of child processes
+$children_count = 0;
+
+// Temporary variable for the status of a terminated child process
+$child_status = null;
+
+// Process identifier, initialized so the parent branch executes
+$pid = 1;
+
+while (true) {
+    if ($pid == -1) {
+        trigger_error('Unable to fork process', E_USER_ERROR);
+    } elseif ($pid) {
+        // Parent process
+
+        // Check for more work, break; if the job is finished
+
+        // Fork another child
+        $children_count++;
+        $pid = pcntl_fork();
+
+        // Wait to fork more children if the max is reached
+        if ($children_count == $children_max) {
+            pcntl_wait($child_status);
+            $children_count--;
+        }
+    } else {
+        // Child process
+
+        // Perform a unit of work
+
+        exit;
+    }
+}
+?>
+</code>
+
+{{Process Control Resources
+
+For more on the Process Control extension, see ''http://php.net/manual/en/book.pcntl.php''.}}

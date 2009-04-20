@@ -4,6 +4,8 @@ There are some instances where markup documents may be so hideously malformed th
 
 While either of these tasks could be done with basic string handling functions and comparison operators, in most cases the implementation would prove to be messy and unreliable. **Regular expressions** provide a syntax consisting of **meta-characters** whereby patterns within strings are expressed flexibly and concisely. This chapter will deal with regular expressions as they relate to the Perl-Compatible Regular Expression (PCRE) PHP extension in particular.
 
+A common bad practice is to use only regular expressions to extract data from markup documents. While this may work for simple scripts that are only intended to be used once or very few times in a short time period, it is more difficult to maintain and less reliable in the long term. Regular expressions simply were not designed for this purpose, whereas other markup-specific extensions discussed in previous chapters are more suited for the task. It is a matter of using the best tool for the job, and to that end, this practice should be avoided.
+
 {{POSIX Extended Regular Expressions
 
 Many PHP developers will cut their teeth on regular expressions using the POSIX regular expression extension, also called the ereg extension. The functions from this extension are being deprecated in PHP 5.3 in favor of those in the PCRE extension, which are faster and provide a more powerful feature set. Aside from differences in syntax for some special character ranges, most ereg expressions require only the addition of expression delimiters to work with preg functions.}}

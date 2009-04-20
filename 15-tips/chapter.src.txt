@@ -20,54 +20,11 @@ An advantage of the batch approach in this situation is that the web scraping ap
 
 =1=Parallel Processing=1=
 
-Two of the HTTP client libraries covered, cURL and pecl_http, support running requests in parallel using a single connection. While the same feature cannot be replicated exactly using other libraries, it is possible to run multiple requests on separate connections using processes that are executed in parallel.
+Two of the HTTP client libraries previously covered, cURL and pecl_http, support running requests in parallel using a single connection. While the same feature cannot be replicated exactly using other libraries, it is possible to run multiple requests on separate connections using processes that are executed in parallel.
 
-Even if you are using a library supporting connection pooling, this technique is useful for situations when multiple hosts are being scraped since each will require a separate connection anyway. In doing so, requests sent to a host with a lower response rate will not block those sent to another more responsive host.
+Even if you are using a library supporting connection pooling, this technique is useful for situations when multiple hosts are being scraped since each host will require a separate connection anyway. By contrast, doing so in a single process means it is possible for requests sent earlier to a host with a lower response rate to block those sent later to another more responsive host.
 
-See below for an example that maintains a particular maximum number of processes until the job being executed in parallel is completed.
-
-<code php>
-<?php
-// Maximum number of child processes to fork off
-$children_max = 10;
-
-// Counter for current number of child processes
-$children_count = 0;
-
-// Whether the job being distributed to children is complete
-$job_finished = false;
-
-// Temporary variable for the status of a terminated child process
-$child_status = null;
-
-// Process identifier, initialized so the parent case executes
-$pid = 1;
-
-while (!$job_finished) {
-    if ($pid == -1) {
-        trigger_error('Unable to fork process', E_USER_ERROR);
-    } elseif ($pid) {
-        // Parent process
-
-        // Check for more work and toggle $job_finished if needed
-
-        // Fork another child
-        $children_count++;
-        $pid = pcntl_fork();
-
-        // Wait to fork more children if the max is reached
-        if ($children_count == $children_max) {
-            pcntl_wait($child_status);
-            $children_count--;
-        }
-    } else {
-        // Child process
-        // Perform a unit of work
-        exit;
-    }
-}
-?>
-</code>
+See Appendix B for a more detailed example this.
 
 =1=Crawlers=1=
 
@@ -107,7 +64,7 @@ During development, it's an advisable to download local copies of documents to b
 
 PHPUnit is among the most popular of PHP unit testing frameworks available. See ''http://phpunit.de'' for more information. Among its many features is the option to output test results to a file in XML format. This feature and others similar to it in both PHPUnit and other unit testing frameworks is very useful in producing results that can be ported to another data medium and made accessible to the web scraping application itself. This facilitates the ability to temporarily restrict or otherwise disable functionality in that application should tests relevant to said functionality fail.
 
-The bottom line is this: debugging a web application can be like trying to shoot a moving target. It's important to make localizing the cause of an issue as easy as possible in order to minimize the turn-around time to updating the web scraping application to accommodate for it. Test failures should alert developers and lock down any sensitive application areas to prevent erroneous transmission, corruption, or deletion of data.
+The bottom line is this: debugging a web application can be like trying to shoot a moving target. It's important to make locating the cause of an issue as easy as possible in order to minimize the turn-around time to updating the web scraping application to accommodate for it. Test failures should alert developers and lock down any sensitive application areas to prevent erroneous transmission, corruption, or deletion of data.
 
 =1=That's All Folks=1=
 
