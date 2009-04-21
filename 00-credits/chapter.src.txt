@@ -1,0 +1,27 @@
+=t=Credits=t=
+
+I know this section probably isn't why you purchased this book, but I encourage you to read on anyway. One of the things I learned during my time in college is that, even if I don't retain all that is taught to me, having even a vague awareness of that knowledge serves to broaden and improve my perspective. I believe the same is true of knowing more about the author when reading a book they've written, in particular the people who contributed to that person's life and perseverence through the completion of their work. The people described here are good people and they deserve to be remembered.
+
+=1=Whitney=1=
+
+I've spent many nights after working days and weekends writing this book. It was a time sink for months. It was also part of my own personal quest to better myself, show my capabilities, and share something I had to offer. I can't imagine that's an easy thing for a spouse to understand or support for as long as it took to finish the book, but my wife did. That's not something for which I can offer sufficient words to describe, let alone recompense, so I won't try. I'll simply say that I hope you enjoy this book because, were it not for her, it would not exist.
+
+=1=MTA=1=
+
+Before I really started working on the book, I tried pitching the abstract to a few of the bigger names in technical publishing with no success. It ended up being for the better, though, because the PHP community is my target audience. In hindsight, I don't think I could have ended up with a better publisher to that end than php|architect. At the time, I only had a single article on the subject in php|architect Magazine to my name. Liz reviewed the proposal and pitched it to Marco, who made the decision to accept it, and Beth reviewed it once the initial manuscript was completed. Each had a hand in ensuring the book became a polished published work and I'll be thankful for their efforts long after the book is in print. 
+
+=1=Luke=1=
+
+I could not have asked for a better technical editor than Luke Giuliani. He has a meticulousness and exceptional attention to detail that occasioanlly surpassed my own, but for the most part is an enjoyable quality we both share. Even when I got stuck in a rut, he was always there to offer motivation and encouragement. His advisement offered not only corrections and suggestions related to the content of the book itself, but also guidance on its organization and presentation to maximize clarity. I severely doubt that my book would be nearly as polished as the copy you see in front of you had it not been for Luke's participation. I owe him a great deal.
+
+=1=Ben=1=
+
+Ben is a man for whom I have immense respect. He is willing to assert his opinions, including the importance of developing and adhering to web standards. Our discussions on topics from the HTTP protocol to interpretation of the Roy Fielding's dissertation on REST have engaged and inspired me. As the light at the end of the tunnel to this book's completion became visible, I began to consider how much it would merit from a foreword by someone with his expertise when it was published. When I approached him about it and asked if he would do the honors, he happily accepted. As wonderful as it felt to finish the project, his valuation of it made the victory that much sweeter.
+
+=1=Friends=1=
+
+The term "friend" is not one that I use lightly. It has long been a belief of mine that family is not something held within a bloodline, but in how people treat one another, and I hold friends in the same regard. There is a special group of people within the PHP community to whom I apply this term. They are too many to name, but each has at one point or another offered critique, suggestion, or moral support whenever I needed it. I think each will know who they are. However small they might consider what they gave, I hope they know its importance and my gratitude for it.
+
+=1=You=1=
+
+While it can take a while longer to write one, time spent reading a book is also a personal investment. This book has made its way through a long journey of development to your hands. You are its audience. I appreciate the time you're taking to read this book and hope that it proves to be time well spent. Regardless of what your opinion of it might be once you've read it, I encourage you to write a review, discuss it on your preferred social networking site, or e-mail me at ''matt@ishouldbecoding.com'' and let me know what your thoughts are.
