@@ -60,6 +60,8 @@ Chapter 13 is a study of CSS selectors, comparisons between them and XPath expre
 
 Chapter 14 explores regular expressions using the PCRE extension, which can be useful in validating scraped data to ensure the stability of the web scraping application.
 
+Finally, Chapter 15 brings it all together and outlines several general high-level strategies and practices for designing and developing your web scraping application.
+
 =1=OK, I've done my homework. How do I get started with web scraping?=1=
 
 Glad you asked. To answer that question, let's move on to the next chapter.
