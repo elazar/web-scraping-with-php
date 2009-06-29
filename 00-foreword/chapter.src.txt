@@ -1,0 +1,23 @@
+Web scraping is the future of the Web.
+
+I didn't believe that when Matthew first approached me, asking me to write the foreword to this book. In fact, I thought quite the opposite. //Web scraping? Isn't that an old topic—something we used to do in the early days of web development? Why would I want to read about web scraping? Isn't it unethical?//
+
+And you're probably asking yourself some of the same questions.
+
+So, I started to think about it — about what web scraping really is — and the more I considered it, the more it reminded me of Tim Berners-Lee's vision of a web of linked data, of semantic data, connected together and open for all to share and use. Is not web scraping simply the act of getting data from one source and parsing it to use in your own applications? Is this not the goal of the Semantic Web?
+
+When the Web began, its purpose was to share data. The educational and research communities used the Web to display data and link it through hyperlinks to other data. Since XML and, much less, web services and data feeds did not exist in the early days, it became common practice to write scripts to fetch data from other websites, parse the HTML received, process the data in some way, and then display it on one's own website.
+
+One of my earliest experiences with web scraping was in 1998 when I wanted to display up-to-date news headlines on a website. At the time, a particular news website (which shall remain unnamed) provided HTML snippets of news headlines for its customers to embed on their websites. I, however, was not a customer, yet I figured out a way to grab the raw HTML, parse it, and display it on my website. As unethical as this may be — and I don't advocate this behavior at all — I was participating in what I would later find out is called "web scraping."
+
+Today, there are many services out there providing news feeds, and there are plenty of code libraries that can parse this data. So, with the proliferation of web services and public APIs, why is web scraping still so important to the future of the Web? It is important because of the rise of microformats, Semantic Web technologies, the W3C Linking Open Data Community Project, and the Open Data Movement. Just this year at the TED conference, Tim Berners-Lee spoke of linked data saying, "We want the data. We want unadulterated data. We have to ask for raw data now."
+
+The future of the Web is in providing and accessing raw data. How do we access this raw data? Through web scraping.
+
+Yes, there are legal issues to consider when determining whether web scraping is a technique you want to employ, but the techniques this book describes are useful for accessing and parsing raw data of any kind found on the Web, whether it is from a web service API, an XML feed, RDF data embedded in a web page, microformats in HTML, or plain old HTML itself.
+
+There is no way around it. To be a successful web programmer, you must master these techniques. Make them part of your toolbox. Let them inform your software design decisions. I encourage you to bring us into the future of the Web. Scrape the Web within the bounds of the law, publish your raw data for public use, and demand raw data now!
+
+Ben Ramsey
+Atlanta, Georgia
+June 28, 2009
