@@ -1,6 +1,6 @@
 =t=Appendix A=t=
 
-The legality of web scraping is a rather complicated question, mainly due to copyright and intellectual property laws. Unfortunately, there is no easy and completely cut-and-dry answer, particularly because these laws can very between countries. There are, however, a few common points for examination when reviewing a prospective web scraping target.
+The legality of web scraping is a rather complicated question, mainly due to copyright and intellectual property laws. Unfortunately, there is no easy and completely cut-and-dry answer, particularly because these laws can vary between countries. There are, however, a few common points for examination when reviewing a prospective web scraping target.
 
 First, web sites often have documents known as Terms of Service (TOS), Terms or Conditions of Use, or User Agreements (hereafter simply known as TOS documents for the sake of reference). These are generally located in an out-of-the-way location like a link in the site footer or in a Legal Documents or Help section. These types of documents are more common on larger and more well-known web sites. Below are segments of several such documents from web sites that explicitly prohibit web scraping of their content.
 
