@@ -12,7 +12,7 @@ The World Wide Web Consortium (W3C) provides a markup validation service in orde
 
 =1=More Than One Way=1=
 
-There are two ways to proceed in cleaning up markup marlformations. One is manual, involves the use of basic string manipulation functions or regular expression functions, and can quickly become messy and rather unmanageable. The other is more automated and involves using the tidy extension to locate and correct markup issues. While the process is configurable, it obviously lacks the fine-grained control that comes with handling it manually.
+There are two ways to proceed in cleaning up markup malformations. One is manual, involves the use of basic string manipulation functions or regular expression functions, and can quickly become messy and rather unmanageable. The other is more automated and involves using the tidy extension to locate and correct markup issues. While the process is configurable, it obviously lacks the fine-grained control that comes with handling it manually.
 
 The majority of this chapter will focus on using tidy to correct markup issues. For those issues that tidy cannot handle to your satisfaction, the approach mentioned earlier involving string and regular expression functions is your alternative. Regular expressions will be covered in more detail in a later chapter.
 
