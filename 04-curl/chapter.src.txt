@@ -246,10 +246,10 @@ do {
 $ch1_response = curl_multi_getcontent($ch1);
 $ch2_response = curl_multi_getcontent($ch2);
 
-curl_multi_remove_handle($ch1);
+curl_multi_remove_handle($mh, $ch1);
 curl_close($ch1);
 
-curl_multi_remove_handle($ch2);
+curl_multi_remove_handle($mh, $ch2);
 curl_close($ch2);
 
 curl_multi_close($mh);
