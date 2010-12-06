@@ -13,7 +13,7 @@ The cURL extension is included in the PHP core, but must either be compiled into
 <code php>
 <?php
 $ch = curl_init('http://localhost.example/');
-curl_setopt($ch, CURLOPT_RETURNTRANSER, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $response = curl_exec($ch);
 curl_close($ch);
 ?>
