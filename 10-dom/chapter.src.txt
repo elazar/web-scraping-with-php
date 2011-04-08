@@ -280,5 +280,5 @@ Only a fraction of what XPath offers has been covered here, mainly basic concept
 - DOM documentation in the PHP manual: ''http://php.net/dom''
 - An excellent overview of XML and XPath: ''http://schlitt.info/opensource/blog/0704_xpath.html''
 - More information on XML: ''http://en.wikibooks.org/wiki/XML:_Managing_Data_Exchange''
-- DOM Level 3 Core standard: ''http://www.w3.org/TR/DOM-Level-3-XPath''
-- DOM Level 3 XPath standard: ''http://www.w3.org/TR/DOM-Level-3-Core''}}
+- DOM Level 3 Core standard: ''http://www.w3.org/TR/DOM-Level-3-Core''
+- DOM Level 3 XPath standard: ''http://www.w3.org/TR/DOM-Level-3-XPath''}}
