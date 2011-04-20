@@ -39,7 +39,7 @@ print_r($meta['wrapper_data']);
 ?>
 </code>
 
-Let's stepping through this.
+Let's step through this.
 
 - The resource ''$handle'' is created to read from the URL '''http://localhost.example'''.
 - The ''stream_get_contents'' function is called to read the remaining data on the stream pointed to by the ''$handle'' resource into ''$response''.
