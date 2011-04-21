@@ -129,7 +129,7 @@ Previously mentioned in the last section on handling headers, the ''curl_getinfo
 <code php>
 <?php
 $ch = curl_init();
-curl_setopt_array(array(
+curl_setopt_array($ch, array(
     CURLOPT_RETURNTRANSFER => true,
     CURLINFO_HEADER_OUT => true
 ));
