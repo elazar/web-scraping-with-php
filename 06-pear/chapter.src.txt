@@ -18,7 +18,7 @@ There are two ways to perform HTTP requests with the related PEAR components: ''
 <?php
 require_once 'HTTP/Request.php';
 
-$request =& HTTP_Request('http://localhost.example');
+$request =& new HTTP_Request('http://localhost.example');
 $request->setMethod(HTTP_REQUEST_METHOD_GET);
 $request->setURL('http://localhost.example');
 $response = $request->sendRequest();
