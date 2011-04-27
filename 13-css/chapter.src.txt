@@ -18,7 +18,7 @@ Even if your decision is to stick with XPath, keep reading. This chapter will al
 
 {{jQuery Examples
 
-The documentation for the jQuery library itself actually has excellent visual client-side examples of selectors. If you find you aren't certain that you understand any of the descriptions of CSS selectors that follow, the jQuery demos and source code will likely prove to be helpful supplements. You can find them at ''http://docs.jquery.com/Selectors/''.}}
+The documentation for the jQuery library itself actually has excellent visual client-side examples of selectors. If you find you aren't certain that you understand any of the descriptions of CSS selectors that follow, the jQuery demos and source code will likely prove to be helpful supplements. You can find them at ''http://api.jquery.com/category/selectors/''.}}
 
 =1=Basics=1=
 
