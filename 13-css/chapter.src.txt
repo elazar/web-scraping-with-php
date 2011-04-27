@@ -197,7 +197,7 @@ Where basic filters are based mainly on the type of node or its position in the 
 
 - ''a:contains("About Us");'' selects all ''a'' nodes where the node value contains the substring ''"About Us"''.
 - ''img:empty'' selects all ''img'' nodes that contain no child nodes (including text nodes).
-- ''li:has(a:contains("About Us"))'' selects all ''li'' nodes that contain an ''a'' node with the substring ''"About Us"'' in its noe value.
+- ''li:has(a:contains("About Us"))'' selects all ''li'' nodes that contain an ''a'' node with the substring ''"About Us"'' in its node value.
 - ''li:parent'' selects all ''li'' nodes that contain child nodes (including text nodes).
 
 <table>
